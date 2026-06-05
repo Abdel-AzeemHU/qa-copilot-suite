@@ -51,8 +51,29 @@ model Project {
   bugReports     BugReport[]
   staticReviews  StaticReview[]
   chatMessages   ChatMessage[]
+  executionRuns  ExecutionRun[]
 
   @@index([orgId])
+}
+
+model ExecutionRun {
+  id             String    @id @default(cuid())
+  projectId      String
+  project        Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  status         String    @default("queued") // queued | running | passed | failed | error
+  targetUrl      String
+  framework      String    @default("playwright")
+  generatedCode  String // the automation code to run
+  logs           String? // accumulated stdout/stderr
+  result         String? // "passed" | "failed" | "error"
+  errorMessage   String?
+  screenshotPath String?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  testCases      TestCase[] // which test cases this run covers
+
+  @@index([projectId])
 }
 
 model AutomationRun {
@@ -130,7 +151,10 @@ model TestCase {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  executionRunId String?
+
+  project      Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  executionRun ExecutionRun? @relation(fields: [executionRunId], references: [id], onDelete: SetNull)
 
   @@index([projectId])
 }
