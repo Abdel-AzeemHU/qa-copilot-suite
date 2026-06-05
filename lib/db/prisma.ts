@@ -1,9 +1,12 @@
+import path from "path";
 import { PrismaClient } from "@prisma/client";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 
-// Prisma 7 requires a driver adapter. The connection URL is read from
-// DATABASE_URL (see .env.local.example).
-const databaseUrl = process.env.DATABASE_URL ?? "file:./prisma/dev.db";
+// Resolve DB path relative to project root so it's stable regardless of cwd.
+const rawUrl = process.env.DATABASE_URL ?? "file:./prisma/dev.db";
+const databaseUrl = rawUrl.startsWith("file:./")
+  ? `file:${path.resolve(process.cwd(), rawUrl.slice(7))}`
+  : rawUrl;
 
 const createPrismaClient = (): PrismaClient => {
   const adapter = new PrismaBetterSqlite3({ url: databaseUrl });
