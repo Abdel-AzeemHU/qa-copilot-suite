@@ -71,6 +71,39 @@ export default async function ProjectPage({
           </div>
         </div>
 
+        <div className="mb-6 flex flex-wrap gap-2">
+          <Link
+            href={`/projects/${project.id}/automation`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Automation Code
+          </Link>
+          <Link
+            href={`/projects/${project.id}/test-plan`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Test Plan
+          </Link>
+          <Link
+            href={`/projects/${project.id}/bug-report`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Bug Report
+          </Link>
+          <Link
+            href={`/projects/${project.id}/review`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Static Review
+          </Link>
+          <Link
+            href={`/projects/${project.id}/chat`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            QA Chat
+          </Link>
+        </div>
+
         <Card>
           <CardHeader>
             <CardTitle>Test cases ({project.testCases.length})</CardTitle>

@@ -80,3 +80,21 @@ export async function getClaudeApiKeyRecord(userId: string) {
     where: { userId_provider: { userId, provider: "claude" } },
   });
 }
+
+/**
+ * Fetches a project with the data needed to ground chat responses: its test
+ * cases, test plans, and full chat history. Returns null if not user-owned.
+ */
+export async function getProjectChatContext(
+  projectId: string,
+  userId: string,
+) {
+  return prisma.project.findFirst({
+    where: { id: projectId, organization: { ownerId: userId } },
+    include: {
+      testCases: { orderBy: { createdAt: "desc" }, take: 50 },
+      testPlans: { orderBy: { createdAt: "desc" }, take: 5 },
+      chatMessages: { orderBy: { createdAt: "asc" } },
+    },
+  });
+}

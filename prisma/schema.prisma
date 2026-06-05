@@ -46,7 +46,74 @@ model Project {
   organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   testCases    TestCase[]
 
+  automationRuns AutomationRun[]
+  testPlans      TestPlan[]
+  bugReports     BugReport[]
+  staticReviews  StaticReview[]
+  chatMessages   ChatMessage[]
+
   @@index([orgId])
+}
+
+model AutomationRun {
+  id        String   @id @default(cuid())
+  projectId String
+  framework String
+  language  String
+  files     String // JSON-encoded Array<{ filename, language, content }>
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model TestPlan {
+  id        String   @id @default(cuid())
+  projectId String
+  input     String // JSON
+  output    String // JSON
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model BugReport {
+  id        String   @id @default(cuid())
+  projectId String
+  input     String // JSON
+  output    String // JSON
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model StaticReview {
+  id        String   @id @default(cuid())
+  projectId String
+  input     String // JSON
+  output    String // JSON
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  projectId String
+  role      String // "user" | "assistant"
+  content   String
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
 }
 
 model TestCase {
