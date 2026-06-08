@@ -92,8 +92,46 @@ model Project {
   chatMessages   ChatMessage[]
   executionRuns  ExecutionRun[]
   integrations   Integration[]
+  pipelineRuns   PipelineRun[]
 
   @@index([orgId])
+}
+
+model PipelineRun {
+  id              String    @id @default(cuid())
+  projectId       String
+  project         Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  status          String    @default("queued") // queued | running | succeeded | failed | error
+  targetUrl       String
+  autoHeal        Boolean   @default(true)
+  autoBug         Boolean   @default(true)
+  notify          Boolean   @default(true)
+  maxHealAttempts Int       @default(2)
+  finalRunId      String?
+  bugReportId     String?
+  summary         String?
+  errorMessage    String?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime  @default(now())
+
+  stages PipelineStage[]
+
+  @@index([projectId])
+}
+
+model PipelineStage {
+  id            String      @id @default(cuid())
+  pipelineRunId String
+  pipelineRun   PipelineRun @relation(fields: [pipelineRunId], references: [id], onDelete: Cascade)
+  name          String // "execute" | "heal" | "bug" | "notify" | "report"
+  sequence      Int
+  status        String      @default("pending") // pending | running | succeeded | skipped | failed
+  detail        String?
+  startedAt     DateTime?
+  completedAt   DateTime?
+
+  @@index([pipelineRunId])
 }
 
 model Integration {
