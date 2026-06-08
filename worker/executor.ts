@@ -3,6 +3,7 @@ import { mkdtemp, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { prisma } from "@/lib/db/prisma";
+import { dispatchIntegrationEvent } from "@/lib/integrations/dispatch";
 
 /**
  * Executes an ExecutionRun's generated automation code as a Node.js script.
@@ -89,6 +90,18 @@ export async function executeRun(runId: string): Promise<void> {
         logs,
       },
     });
+
+    dispatchIntegrationEvent(run.projectId, {
+      type: "run.completed",
+      run: {
+        id: run.id,
+        projectId: run.projectId,
+        status: result,
+        result,
+        targetUrl: run.targetUrl,
+        errorMessage: null,
+      },
+    }).catch(() => {});
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     await prisma.executionRun.update({
@@ -100,6 +113,18 @@ export async function executeRun(runId: string): Promise<void> {
         completedAt: new Date(),
       },
     });
+
+    dispatchIntegrationEvent(run.projectId, {
+      type: "run.completed",
+      run: {
+        id: run.id,
+        projectId: run.projectId,
+        status: "error",
+        result: "error",
+        targetUrl: run.targetUrl,
+        errorMessage: message,
+      },
+    }).catch(() => {});
   } finally {
     if (tempDir) {
       await rm(tempDir, { recursive: true, force: true }).catch(() => {});

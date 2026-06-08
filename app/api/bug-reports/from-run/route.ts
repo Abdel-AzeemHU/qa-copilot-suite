@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { dispatchIntegrationEvent } from "@/lib/integrations/dispatch";
 
 const schema = z.object({
   runId: z.string().min(1),
@@ -73,6 +74,15 @@ export async function POST(req: NextRequest) {
       output: JSON.stringify(output),
     },
   });
+
+  dispatchIntegrationEvent(bugReport.projectId, {
+    type: "bug.created",
+    bugReport: {
+      id: bugReport.id,
+      projectId: bugReport.projectId,
+      output: bugReport.output,
+    },
+  }).catch(() => {});
 
   return NextResponse.json({ id: bugReport.id });
 }

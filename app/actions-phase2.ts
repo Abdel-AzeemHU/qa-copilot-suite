@@ -9,6 +9,7 @@ import {
   getClaudeApiKeyRecord,
 } from "@/lib/data";
 import { ClaudeProvider } from "@/lib/ai/claude";
+import { dispatchIntegrationEvent } from "@/lib/integrations/dispatch";
 import { runHelper } from "@/lib/ai/run-helper";
 import type { LLMProvider } from "@/lib/ai/provider";
 import {
@@ -175,13 +176,22 @@ export async function generateBugReport(
 
   try {
     const output = await runHelper(bugReporterHelper, input, provider);
-    await prisma.bugReport.create({
+    const bugReport = await prisma.bugReport.create({
       data: {
         projectId,
         input: JSON.stringify(input),
         output: JSON.stringify(output),
       },
     });
+
+    dispatchIntegrationEvent(bugReport.projectId, {
+      type: "bug.created",
+      bugReport: {
+        id: bugReport.id,
+        projectId: bugReport.projectId,
+        output: bugReport.output,
+      },
+    }).catch(() => {});
   } catch (err) {
     const message = err instanceof Error ? err.message : "Generation failed";
     return { error: `Bug report generation failed: ${message}` };
