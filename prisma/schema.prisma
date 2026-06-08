@@ -73,7 +73,30 @@ model ExecutionRun {
   createdAt      DateTime  @default(now())
   testCases      TestCase[] // which test cases this run covers
 
+  healingAttempts HealingAttempt[] @relation("OriginalRun")
+  verifiesAttempt HealingAttempt?  @relation("VerificationRun")
+  bugReports      BugReport[]
+
   @@index([projectId])
+}
+
+model HealingAttempt {
+  id              String    @id @default(cuid())
+  executionRunId  String
+  attemptNumber   Int
+  classification  String // "repairable" | "likely_bug" | "inconclusive"
+  diagnosis       String
+  patchedCode     String?
+  newRunId        String?   @unique
+  status          String    @default("analyzing") // analyzing | patched | verifying | healed | failed_again | needs_review | error
+  errorMessage    String?
+  createdAt       DateTime  @default(now())
+  completedAt     DateTime?
+
+  executionRun ExecutionRun  @relation("OriginalRun", fields: [executionRunId], references: [id], onDelete: Cascade)
+  newRun       ExecutionRun? @relation("VerificationRun", fields: [newRunId], references: [id], onDelete: SetNull)
+
+  @@index([executionRunId])
 }
 
 model AutomationRun {
@@ -102,15 +125,18 @@ model TestPlan {
 }
 
 model BugReport {
-  id        String   @id @default(cuid())
-  projectId String
-  input     String // JSON
-  output    String // JSON
-  createdAt DateTime @default(now())
+  id             String   @id @default(cuid())
+  projectId      String
+  input          String // JSON
+  output         String // JSON
+  executionRunId String?
+  createdAt      DateTime @default(now())
 
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project      Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  executionRun ExecutionRun? @relation(fields: [executionRunId], references: [id], onDelete: SetNull)
 
   @@index([projectId])
+  @@index([executionRunId])
 }
 
 model StaticReview {

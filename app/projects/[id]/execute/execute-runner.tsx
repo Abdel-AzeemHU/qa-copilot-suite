@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
+import { HealingPanel } from "./healing-panel";
 
 export interface PastRun {
   id: string;
@@ -51,6 +52,9 @@ export function ExecuteRunner({
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
   const [run, setRun] = useState<RunStatus | null>(null);
+  const [selectedPastRunId, setSelectedPastRunId] = useState<string | null>(
+    null,
+  );
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const logRef = useRef<HTMLPreElement | null>(null);
 
@@ -159,6 +163,10 @@ export function ExecuteRunner({
             <p className="text-sm text-red-600">{run.errorMessage}</p>
           ) : null}
 
+          {run.status === "failed" || run.status === "error" ? (
+            <HealingPanel runId={run.id} />
+          ) : null}
+
           <div>
             <Label>Live log output</Label>
             <pre
@@ -185,6 +193,7 @@ export function ExecuteRunner({
                   <th className="px-3 py-2 font-medium">Target URL</th>
                   <th className="px-3 py-2 font-medium">Created</th>
                   <th className="px-3 py-2 font-medium">Completed</th>
+                  <th className="px-3 py-2 font-medium"></th>
                 </tr>
               </thead>
               <tbody>
@@ -207,12 +216,34 @@ export function ExecuteRunner({
                         ? new Date(r.completedAt).toLocaleString()
                         : "—"}
                     </td>
+                    <td className="px-3 py-2">
+                      {r.status === "failed" || r.status === "error" ? (
+                        <button
+                          type="button"
+                          className="text-xs font-medium text-blue-700 underline-offset-2 hover:underline"
+                          onClick={() =>
+                            setSelectedPastRunId((cur) =>
+                              cur === r.id ? null : r.id,
+                            )
+                          }
+                        >
+                          {selectedPastRunId === r.id
+                            ? "Hide self-heal"
+                            : "Self-heal…"}
+                        </button>
+                      ) : null}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         )}
+        {selectedPastRunId ? (
+          <div className="mt-4">
+            <HealingPanel runId={selectedPastRunId} />
+          </div>
+        ) : null}
       </div>
     </div>
   );

@@ -108,6 +108,12 @@ export default async function ProjectPage({
           >
             Run Tests
           </Link>
+          <Link
+            href={`/projects/${project.id}/traceability`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Traceability
+          </Link>
         </div>
 
         <Card>
