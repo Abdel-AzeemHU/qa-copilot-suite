@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db/prisma";
 import { encrypt } from "@/lib/crypto";
 import { serializeIntegration } from "@/lib/integrations/serialize";
+import { requireOrgRole } from "@/lib/data";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -21,8 +22,9 @@ async function getOwnedIntegration(
     where: {
       id: integrationId,
       projectId,
-      project: { organization: { ownerId: userId } },
+      project: { organization: { memberships: { some: { userId } } } },
     },
+    include: { project: { select: { orgId: true } } },
   });
 }
 
@@ -39,6 +41,12 @@ export async function PATCH(
   const existing = await getOwnedIntegration(id, integrationId, session.user.id);
   if (!existing) {
     return NextResponse.json({ error: "Integration not found" }, { status: 404 });
+  }
+  if (!(await requireOrgRole(session.user.id, existing.project.orgId, "admin"))) {
+    return NextResponse.json(
+      { error: "Managing integrations requires an admin or owner role." },
+      { status: 403 },
+    );
   }
 
   const body = await req.json().catch(() => null);
@@ -78,6 +86,12 @@ export async function DELETE(
   const existing = await getOwnedIntegration(id, integrationId, session.user.id);
   if (!existing) {
     return NextResponse.json({ error: "Integration not found" }, { status: 404 });
+  }
+  if (!(await requireOrgRole(session.user.id, existing.project.orgId, "admin"))) {
+    return NextResponse.json(
+      { error: "Managing integrations requires an admin or owner role." },
+      { status: 403 },
+    );
   }
 
   await prisma.integration.delete({ where: { id: integrationId } });

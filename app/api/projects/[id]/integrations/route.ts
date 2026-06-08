@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db/prisma";
 import { encrypt } from "@/lib/crypto";
 import { serializeIntegration } from "@/lib/integrations/serialize";
+import { requireOrgRole } from "@/lib/data";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -16,8 +17,8 @@ const createSchema = z.object({
 
 async function getOwnedProject(projectId: string, userId: string) {
   return prisma.project.findFirst({
-    where: { id: projectId, organization: { ownerId: userId } },
-    select: { id: true },
+    where: { id: projectId, organization: { memberships: { some: { userId } } } },
+    select: { id: true, orgId: true },
   });
 }
 
@@ -57,6 +58,12 @@ export async function POST(
   const project = await getOwnedProject(id, session.user.id);
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
+  if (!(await requireOrgRole(session.user.id, project.orgId, "admin"))) {
+    return NextResponse.json(
+      { error: "Managing integrations requires an admin or owner role." },
+      { status: 403 },
+    );
   }
 
   const body = await req.json().catch(() => null);

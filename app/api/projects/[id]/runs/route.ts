@@ -13,7 +13,7 @@ export async function GET(
 
   const { id } = await params;
   const project = await prisma.project.findFirst({
-    where: { id, organization: { ownerId: session.user.id } },
+    where: { id, organization: { memberships: { some: { userId: session.user.id } } } },
     select: { id: true },
   });
   if (!project) {

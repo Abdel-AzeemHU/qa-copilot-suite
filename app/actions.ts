@@ -264,7 +264,7 @@ export async function updateTestCaseAction(
 
   // Ownership check.
   const existing = await prisma.testCase.findFirst({
-    where: { id, project: { organization: { ownerId: userId } } },
+    where: { id, project: { organization: { memberships: { some: { userId } } } } },
     select: { id: true, projectId: true },
   });
   if (!existing) {

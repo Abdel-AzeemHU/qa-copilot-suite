@@ -17,7 +17,7 @@ export async function POST(
     where: {
       id: integrationId,
       projectId: id,
-      project: { organization: { ownerId: session.user.id } },
+      project: { organization: { memberships: { some: { userId: session.user.id } } } },
     },
   });
   if (!integration) {

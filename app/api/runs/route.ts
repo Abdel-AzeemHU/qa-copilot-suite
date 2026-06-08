@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
   // Ownership check.
   const project = await prisma.project.findFirst({
-    where: { id: projectId, organization: { ownerId: session.user.id } },
+    where: { id: projectId, organization: { memberships: { some: { userId: session.user.id } } } },
     select: { id: true },
   });
   if (!project) {

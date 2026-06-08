@@ -18,7 +18,7 @@ export async function POST(
   const run = await prisma.executionRun.findFirst({
     where: {
       id,
-      project: { organization: { ownerId: session.user.id } },
+      project: { organization: { memberships: { some: { userId: session.user.id } } } },
     },
     select: { id: true, status: true },
   });
@@ -72,7 +72,7 @@ export async function GET(
   const run = await prisma.executionRun.findFirst({
     where: {
       id,
-      project: { organization: { ownerId: session.user.id } },
+      project: { organization: { memberships: { some: { userId: session.user.id } } } },
     },
     select: { id: true },
   });

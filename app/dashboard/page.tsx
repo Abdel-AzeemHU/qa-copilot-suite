@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { listProjects } from "@/lib/data";
+import { listProjects, getOrCreateDefaultOrg } from "@/lib/data";
 import { AppHeader } from "@/components/app-header";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -17,6 +17,7 @@ export default async function DashboardPage() {
   if (!session?.user) redirect("/login");
 
   const projects = await listProjects(session.user.id);
+  const orgId = await getOrCreateDefaultOrg(session.user.id);
 
   return (
     <>
@@ -24,9 +25,17 @@ export default async function DashboardPage() {
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">
         <div className="mb-6 flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Projects</h1>
-          <Link href="/projects/new" className={buttonVariants()}>
-            New project
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/orgs/${orgId}/members`}
+              className={buttonVariants({ variant: "outline" })}
+            >
+              Team
+            </Link>
+            <Link href="/projects/new" className={buttonVariants()}>
+              New project
+            </Link>
+          </div>
         </div>
 
         {projects.length === 0 ? (

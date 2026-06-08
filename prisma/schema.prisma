@@ -19,6 +19,9 @@ model User {
   organizations Organization[]
   apiKeys       ApiKey[]
 
+  memberships     Membership[]
+  invitationsSent Invitation[] @relation("InvitedBy")
+
   // NextAuth relations
   accounts Account[]
   sessions Session[]
@@ -33,7 +36,43 @@ model Organization {
   owner    User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   projects Project[]
 
+  memberships Membership[]
+  invitations Invitation[]
+
   @@index([ownerId])
+}
+
+model Membership {
+  id        String   @id @default(cuid())
+  userId    String
+  orgId     String
+  role      String // "owner" | "admin" | "member"
+  createdAt DateTime @default(now())
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, orgId])
+  @@index([orgId])
+}
+
+model Invitation {
+  id          String    @id @default(cuid())
+  orgId       String
+  email       String
+  role        String // "admin" | "member"
+  token       String    @unique
+  invitedById String
+  status      String    @default("pending") // "pending" | "accepted" | "revoked"
+  createdAt   DateTime  @default(now())
+  acceptedAt  DateTime?
+  expiresAt   DateTime
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  invitedBy    User         @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+  @@index([email])
 }
 
 model Project {

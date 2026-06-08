@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
   const run = await prisma.executionRun.findFirst({
     where: {
       id: parsed.data.runId,
-      project: { organization: { ownerId: session.user.id } },
+      project: { organization: { memberships: { some: { userId: session.user.id } } } },
     },
     include: { testCases: true },
   });
