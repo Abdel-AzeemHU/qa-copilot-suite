@@ -2,6 +2,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/db/prisma";
 import { NextResponse } from "next/server";
 import { runHealingAttempt } from "@/worker/healer";
+import { rateLimit } from "@/lib/rate-limit";
+import { logAudit } from "@/lib/audit";
 
 const MAX_ATTEMPTS = 3;
 
@@ -14,13 +16,21 @@ export async function POST(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const rl = rateLimit(`${session.user.id}:POST /api/runs/[id]/heal`, 10, 10 * 60 * 1000);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded", retryAfter: rl.retryAfter },
+      { status: 429 },
+    );
+  }
+
   const { id } = await params;
   const run = await prisma.executionRun.findFirst({
     where: {
       id,
       project: { organization: { memberships: { some: { userId: session.user.id } } } },
     },
-    select: { id: true, status: true },
+    select: { id: true, status: true, projectId: true },
   });
   if (!run) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -51,6 +61,14 @@ export async function POST(
       diagnosis: "",
       status: "analyzing",
     },
+  });
+
+  logAudit({
+    userId: session.user.id,
+    action: "run.heal",
+    entityType: "HealingAttempt",
+    entityId: attempt.id,
+    meta: { executionRunId: id },
   });
 
   // Fire-and-forget: do NOT await the orchestration.

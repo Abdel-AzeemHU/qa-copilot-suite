@@ -330,3 +330,19 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  orgId      String?
+  userId     String?
+  action     String
+  entityType String?
+  entityId   String?
+  meta       String?  // JSON
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([orgId])
+  @@index([userId])
+  @@index([createdAt])
+}

@@ -5,6 +5,7 @@ import { serializeIntegration } from "@/lib/integrations/serialize";
 import { requireOrgRole } from "@/lib/data";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { logAudit } from "@/lib/audit";
 
 const TYPES = ["slack", "github", "webhook"] as const;
 
@@ -85,6 +86,16 @@ export async function POST(
       config: JSON.stringify(config ?? {}),
       encryptedSecret: secret ? encrypt(secret) : null,
     },
+  });
+
+  logAudit({
+    orgId: project.orgId,
+    userId: session.user.id,
+    action: "integration.create",
+    entityType: "Integration",
+    entityId: integration.id,
+    meta: { type },
+    ip: req.headers.get("x-forwarded-for") ?? undefined,
   });
 
   return NextResponse.json(serializeIntegration(integration), { status: 201 });

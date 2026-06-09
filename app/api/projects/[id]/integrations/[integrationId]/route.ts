@@ -5,6 +5,7 @@ import { serializeIntegration } from "@/lib/integrations/serialize";
 import { requireOrgRole } from "@/lib/data";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { logAudit } from "@/lib/audit";
 
 const patchSchema = z.object({
   name: z.string().min(1).max(120).optional(),
@@ -95,6 +96,14 @@ export async function DELETE(
   }
 
   await prisma.integration.delete({ where: { id: integrationId } });
+
+  logAudit({
+    orgId: existing.project.orgId,
+    userId: session.user.id,
+    action: "integration.delete",
+    entityType: "Integration",
+    entityId: integrationId,
+  });
 
   return NextResponse.json({ ok: true });
 }

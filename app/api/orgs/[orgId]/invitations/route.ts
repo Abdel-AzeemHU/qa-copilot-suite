@@ -4,6 +4,12 @@ import { prisma } from "@/lib/db/prisma";
 import { requireOrgRole } from "@/lib/data";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { rateLimit } from "@/lib/rate-limit";
+import { logAudit } from "@/lib/audit";
+import { withHandler } from "@/lib/api-handler";
+import { unauthorized, forbidden, badRequest } from "@/lib/errors";
+import { getOrgUsage } from "@/lib/usage";
+import { checkLimit, ORG_LIMITS } from "@/lib/limits";
 
 const INVITE_TTL_DAYS = 7;
 
@@ -20,31 +26,36 @@ function inviteUrl(req: NextRequest, token: string): string {
 /**
  * POST /api/orgs/[orgId]/invitations — invite a user by email. Admin/owner only.
  */
-export async function POST(
+export const POST = withHandler(async (
   req: NextRequest,
   { params }: { params: Promise<{ orgId: string }> },
-) {
+) => {
   const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  if (!session?.user?.id) throw unauthorized();
 
   const { orgId } = await params;
-  if (!(await requireOrgRole(session.user.id, orgId, "admin"))) {
+
+  const rl = rateLimit(`${session.user.id}:POST /api/orgs/invitations`, 20, 60 * 60 * 1000);
+  if (!rl.allowed) {
     return NextResponse.json(
-      { error: "Inviting members requires an admin or owner role." },
-      { status: 403 },
+      { error: "Rate limit exceeded", retryAfter: rl.retryAfter },
+      { status: 429 },
     );
+  }
+
+  if (!(await requireOrgRole(session.user.id, orgId, "admin"))) {
+    throw forbidden("Inviting members requires an admin or owner role.");
   }
 
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? "Invalid input" },
-      { status: 400 },
-    );
+    throw badRequest(parsed.error.issues[0]?.message ?? "Invalid input");
   }
+
+  // Usage limit check
+  const usage = await getOrgUsage(orgId);
+  checkLimit(usage.members, ORG_LIMITS.maxMembersPerOrg, "members");
 
   const email = parsed.data.email.toLowerCase().trim();
   const { role } = parsed.data;
@@ -56,10 +67,7 @@ export async function POST(
       where: { userId_orgId: { userId: existingUser.id, orgId } },
     });
     if (alreadyMember) {
-      return NextResponse.json(
-        { error: "That user is already a member of this organization." },
-        { status: 409 },
-      );
+      throw badRequest("That user is already a member of this organization.");
     }
   }
 
@@ -95,6 +103,16 @@ export async function POST(
     });
   }
 
+  logAudit({
+    orgId,
+    userId: session.user.id,
+    action: "member.invite",
+    entityType: "Invitation",
+    entityId: invitation.id,
+    meta: { email, role },
+    ip: req.headers.get("x-forwarded-for") ?? undefined,
+  });
+
   return NextResponse.json(
     {
       id: invitation.id,
@@ -106,4 +124,4 @@ export async function POST(
     },
     { status: 201 },
   );
-}
+});

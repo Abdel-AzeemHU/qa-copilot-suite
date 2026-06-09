@@ -15,6 +15,9 @@ const db = vi.hoisted(() => ({
     update: vi.fn(async (a: { data: unknown }) => ({ id: "m1", ...(a.data as object) })),
     delete: vi.fn(async () => ({})),
   },
+  auditLog: {
+    create: vi.fn(async () => ({})),
+  },
 }));
 
 vi.mock("@/lib/db/prisma", () => ({ prisma: db }));

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getMembership, requireOrgRole } from "@/lib/data";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { logAudit } from "@/lib/audit";
 
 const patchSchema = z.object({
   role: z.enum(["owner", "admin", "member"]),
@@ -66,6 +67,15 @@ export async function PATCH(
     data: { role: parsed.data.role },
   });
 
+  logAudit({
+    orgId,
+    userId: session.user.id,
+    action: "member.role_change",
+    entityType: "Membership",
+    entityId: membershipId,
+    meta: { newRole: parsed.data.role },
+  });
+
   return NextResponse.json({ membershipId: updated.id, role: updated.role });
 }
 
@@ -116,6 +126,14 @@ export async function DELETE(
   }
 
   await prisma.membership.delete({ where: { id: membershipId } });
+
+  logAudit({
+    orgId,
+    userId: session.user.id,
+    action: "member.remove",
+    entityType: "Membership",
+    entityId: membershipId,
+  });
 
   return NextResponse.json({ ok: true });
 }

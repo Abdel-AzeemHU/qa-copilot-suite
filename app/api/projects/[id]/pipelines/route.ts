@@ -3,6 +3,12 @@ import { prisma } from "@/lib/db/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { runPipeline } from "@/worker/orchestrator";
+import { rateLimit } from "@/lib/rate-limit";
+import { logAudit } from "@/lib/audit";
+import { withHandler } from "@/lib/api-handler";
+import { unauthorized, notFound, badRequest } from "@/lib/errors";
+import { getOrgUsage } from "@/lib/usage";
+import { checkLimit, ORG_LIMITS } from "@/lib/limits";
 
 const STAGE_NAMES = ["execute", "heal", "bug", "notify", "report"] as const;
 
@@ -15,13 +21,19 @@ const schema = z.object({
   generatedCode: z.string().optional(),
 });
 
-export async function POST(
+export const POST = withHandler(async (
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
-) {
+) => {
   const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.id) throw unauthorized();
+
+  const rl = rateLimit(`${session.user.id}:POST /api/projects/[id]/pipelines`, 10, 10 * 60 * 1000);
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: "Rate limit exceeded", retryAfter: rl.retryAfter },
+      { status: 429 },
+    );
   }
 
   const { id: projectId } = await params;
@@ -31,19 +43,18 @@ export async function POST(
       id: projectId,
       organization: { memberships: { some: { userId: session.user.id } } },
     },
-    select: { id: true },
+    select: { id: true, orgId: true },
   });
-  if (!project) {
-    return NextResponse.json({ error: "Project not found" }, { status: 404 });
-  }
+  if (!project) throw notFound("Project not found");
+
+  // Usage limit check
+  const usage = await getOrgUsage(project.orgId);
+  checkLimit(usage.pipelineRunsThisMonth, ORG_LIMITS.maxPipelineRunsPerMonth, "pipeline runs this month");
 
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? "Invalid input" },
-      { status: 400 },
-    );
+    throw badRequest(parsed.error.issues[0]?.message ?? "Invalid input");
   }
   const { targetUrl, autoHeal, autoBug, notify, maxHealAttempts } = parsed.data;
 
@@ -65,11 +76,20 @@ export async function POST(
     },
   });
 
+  logAudit({
+    orgId: project.orgId,
+    userId: session.user.id,
+    action: "pipeline.start",
+    entityType: "PipelineRun",
+    entityId: pipeline.id,
+    ip: req.headers.get("x-forwarded-for") ?? undefined,
+  });
+
   // Fire-and-forget: do NOT await the orchestration.
   void runPipeline(pipeline.id);
 
   return NextResponse.json({ id: pipeline.id });
-}
+});
 
 export async function GET(
   _req: NextRequest,
