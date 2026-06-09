@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import type { LLMProvider, LLMStructuredRequest } from "./provider";
+import type { LLMProvider, LLMStructuredRequest, LLMVisionRequest } from "./provider";
 
 /**
  * OpenAI adapter for the {@link LLMProvider} interface. Uses OpenAI tool use
@@ -50,6 +50,53 @@ export class OpenAIProvider implements LLMProvider {
     }
 
     // The OpenAI SDK types tool_calls as a union; narrow to the standard shape.
+    const args =
+      "function" in toolCall
+        ? (toolCall as { function: { arguments: string } }).function.arguments
+        : "";
+    return JSON.parse(args) as unknown;
+  }
+
+  async generateWithVision(req: LLMVisionRequest): Promise<unknown> {
+    const response = await this.client.chat.completions.create({
+      model: this.model,
+      max_tokens: req.maxTokens ?? 16000,
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: req.tool.name,
+            description: req.tool.description,
+            parameters: req.tool.inputSchema as Record<string, unknown>,
+          },
+        },
+      ],
+      tool_choice: {
+        type: "function",
+        function: { name: req.tool.name },
+      },
+      messages: [
+        { role: "system", content: req.system },
+        {
+          role: "user",
+          content: [
+            {
+              type: "image_url",
+              image_url: { url: `data:${req.imageMimeType};base64,${req.imageBase64}` },
+            },
+            { type: "text", text: req.userMessage },
+          ],
+        },
+      ],
+    });
+
+    const toolCall = response.choices[0]?.message?.tool_calls?.[0];
+    if (!toolCall) {
+      throw new Error(
+        `OpenAI did not return a tool call for tool "${req.tool.name}"`,
+      );
+    }
+
     const args =
       "function" in toolCall
         ? (toolCall as { function: { arguments: string } }).function.arguments

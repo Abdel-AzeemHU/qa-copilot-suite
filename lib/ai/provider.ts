@@ -18,6 +18,15 @@ export interface LLMStructuredRequest {
   maxTokens?: number;
 }
 
+export interface LLMVisionRequest {
+  system: string;
+  userMessage: string;
+  imageBase64: string;
+  imageMimeType: string;
+  tool: LLMToolSpec;
+  maxTokens?: number;
+}
+
 export interface LLMProvider {
   readonly name: string;
   /**
@@ -26,4 +35,10 @@ export interface LLMProvider {
    * expected to validate it against their own Zod schema.
    */
   generateStructured(req: LLMStructuredRequest): Promise<unknown>;
+
+  /**
+   * Optional vision-capable structured output: sends an image alongside the
+   * user message. Falls back to generateStructured if not implemented.
+   */
+  generateWithVision?(req: LLMVisionRequest): Promise<unknown>;
 }

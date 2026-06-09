@@ -138,6 +138,12 @@ export default async function ProjectPage({
           >
             Schedules
           </Link>
+          <Link
+            href={`/projects/${project.id}/visual`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Visual
+          </Link>
         </div>
 
         <Card>

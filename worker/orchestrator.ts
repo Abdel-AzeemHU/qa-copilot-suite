@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db/prisma";
 import { dispatchIntegrationEvent } from "@/lib/integrations/dispatch";
 import { executeRun } from "./executor";
 import { runHealingAttempt } from "./healer";
+import { runVisualComparison } from "./visual-runner";
 
 /**
  * Orchestrator pipeline: chains the existing QA capabilities into one
@@ -23,7 +24,7 @@ const TERMINAL_OUTCOMES = {
   error: "error",
 } as const;
 
-type StageName = "execute" | "heal" | "bug" | "notify" | "report";
+type StageName = "execute" | "heal" | "bug" | "visual" | "notify" | "report";
 
 async function startStage(pipelineRunId: string, name: StageName) {
   await prisma.pipelineStage.updateMany({
@@ -269,6 +270,35 @@ export async function runPipeline(pipelineRunId: string): Promise<void> {
           JSON.stringify({ error: message }),
         );
       }
+    }
+
+    // --- 3b. VISUAL --------------------------------------------------------
+    try {
+      const visualBaselines = await prisma.visualBaseline.findMany({
+        where: { projectId },
+        select: { id: true },
+      });
+
+      if (visualBaselines.length > 0) {
+        // Fire-and-forget visual comparison runs for each baseline
+        const visualRunIds: string[] = [];
+        for (const baseline of visualBaselines) {
+          const vRun = await prisma.visualRun.create({
+            data: {
+              projectId,
+              baselineId: baseline.id,
+              url: pipeline.targetUrl,
+              viewport: JSON.stringify({ width: 1440, height: 900 }),
+              status: "queued",
+            },
+          });
+          visualRunIds.push(vRun.id);
+          void runVisualComparison(vRun.id).catch(() => {});
+        }
+        notes.push(`visual: queued ${visualRunIds.length} run(s)`);
+      }
+    } catch {
+      // Visual is non-critical — don't fail the pipeline
     }
 
     // --- 4. NOTIFY ---------------------------------------------------------
