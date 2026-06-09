@@ -7,23 +7,33 @@ const cols = [
     links: [
       { href: "/features", label: "Features" },
       { href: "/pricing", label: "Pricing" },
-      { href: "/features", label: "Modules" },
+      { href: "/features#workflow-demo", label: "How it works" },
+      { href: "/register", label: "Get Started" },
     ],
   },
   {
     title: "Company",
     links: [
       { href: "/about", label: "About" },
-      { href: "/about", label: "Privacy" },
-      { href: "/about", label: "Terms" },
+      { href: "/about", label: "Blog" },
+      { href: "/about", label: "Careers" },
     ],
   },
   {
-    title: "Resources",
+    title: "Legal",
     links: [
-      { href: "/features", label: "Documentation" },
-      { href: "/register", label: "Get Started" },
-      { href: "/login", label: "Sign in" },
+      { href: "/privacy", label: "Privacy Policy" },
+      { href: "/terms", label: "Terms of Service" },
+      { href: "/about", label: "Security" },
+    ],
+  },
+  {
+    title: "Connect",
+    links: [
+      { href: "https://github.com", label: "GitHub" },
+      { href: "https://twitter.com", label: "Twitter / X" },
+      { href: "https://discord.com", label: "Discord" },
+      { href: "/about", label: "Contact" },
     ],
   },
 ];
@@ -31,7 +41,7 @@ const cols = [
 export function MarketingFooter() {
   return (
     <footer className="border-t border-white/10 bg-[#0a0b14]">
-      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
+      <div className="mx-auto grid max-w-7xl gap-10 px-5 py-14 sm:px-8 md:grid-cols-[1.5fr_1fr_1fr_1fr_1fr]">
         <div className="max-w-xs">
           <Logo />
           <p className="mt-4 text-sm font-medium text-emerald-400">
@@ -63,8 +73,11 @@ export function MarketingFooter() {
         ))}
       </div>
       <div className="border-t border-white/10">
-        <div className="mx-auto max-w-7xl px-5 py-6 text-sm text-slate-500 sm:px-8">
-          © 2026 QA Copilot Suite. All rights reserved.
+        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-3 px-5 py-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:px-8">
+          <span>© 2026 QA Copilot Suite. All rights reserved.</span>
+          <span className="text-xs text-slate-600">
+            Illustrative product — in open beta.
+          </span>
         </div>
       </div>
     </footer>

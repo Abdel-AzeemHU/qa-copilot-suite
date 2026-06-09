@@ -207,6 +207,51 @@ export default function FeaturesPage() {
         ))}
       </div>
 
+      {/* Comparison Table */}
+      <div className="mt-24">
+        <div className="mb-10 text-center">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-400">
+            Why QA Copilot
+          </p>
+          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            How we compare to manual QA
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-slate-300">
+            See what changes when you close the loop with AI.
+          </p>
+        </div>
+        <div className="overflow-x-auto rounded-2xl border border-white/10">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-white/10 bg-white/[0.03]">
+                <th className="p-4 text-left text-sm font-medium text-slate-400">Capability</th>
+                <th className="p-4 text-center text-sm font-medium text-slate-400">Manual QA</th>
+                <th className="p-4 text-center text-sm font-medium text-slate-400">Other Tools</th>
+                <th className="p-4 text-center text-sm font-semibold text-indigo-300">QA Copilot Suite</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { capability: "Test Case Generation", manual: "Hours/days", other: "Templates only", copilot: "Seconds, from requirements" },
+                { capability: "Coverage Analysis", manual: "Manual spreadsheet", other: "Basic metrics", copilot: "Requirement-linked traceability" },
+                { capability: "Automation Code", manual: "Written by hand", other: "Record & playback", copilot: "AI-generated Playwright/Selenium" },
+                { capability: "Bug Filing", manual: "Manual Jira entry", other: "Not included", copilot: "Automatic, with repro steps" },
+                { capability: "Self-Healing", manual: "Manual locator fix", other: "Not included", copilot: "AI diagnoses & rewrites selectors" },
+                { capability: "Scheduling", manual: "Manual trigger", other: "Basic cron", copilot: "CI events, cron, on-demand" },
+                { capability: "Requirement Gaps", manual: "Missed silently", other: "Not detected", copilot: "AI audit before generation" },
+              ].map((row, i) => (
+                <tr key={row.capability} className={`border-b border-white/5 ${i % 2 === 0 ? "" : "bg-white/[0.015]"}`}>
+                  <td className="p-4 text-sm font-medium text-slate-200">{row.capability}</td>
+                  <td className="p-4 text-center text-sm text-slate-500">{row.manual}</td>
+                  <td className="p-4 text-center text-sm text-slate-400">{row.other}</td>
+                  <td className="p-4 text-center text-sm font-medium text-emerald-300">{row.copilot}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div className="mt-16 text-center">
         <Link
           href="/register"
