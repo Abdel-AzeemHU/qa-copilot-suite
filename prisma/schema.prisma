@@ -99,8 +99,26 @@ model Project {
   selectorCache  SelectorCache[]
   visualBaselines VisualBaseline[]
   visualRuns      VisualRun[]
+  apiTokens       ProjectApiToken[]
 
   @@index([orgId])
+}
+
+model ProjectApiToken {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name        String // e.g. "GitHub Actions CI"
+  tokenPrefix String // first 8 chars, shown in UI for identification
+  tokenHash   String   @unique // sha256 hash of the full token
+  lastUsedAt  DateTime?
+  createdById String
+  expiresAt   DateTime? // optional expiry
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([projectId])
+  @@index([tokenHash])
 }
 
 model PipelineRun {
@@ -117,6 +135,7 @@ model PipelineRun {
   bugReportId     String?
   summary         String?
   errorMessage    String?
+  ciMetadata      String?   // JSON: { ref, commit, prNumber, source: "github-actions" }
   startedAt       DateTime?
   completedAt     DateTime?
   createdAt       DateTime  @default(now())

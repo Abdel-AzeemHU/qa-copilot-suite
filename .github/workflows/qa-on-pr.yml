@@ -1,0 +1,21 @@
+# EXAMPLE — copy this into your own repo and remove the `if: false` guard.
+#
+# This workflow is intentionally gated with `if: false` so it does NOT run in
+# the QA Copilot Suite repo itself. In your repo, delete the `if: false` line
+# (and this comment) to run QA Copilot Suite on every pull request.
+name: QA Copilot on PR
+on: pull_request
+jobs:
+  qa:
+    # EXAMPLE GUARD — remove this `if: false` in your own repo.
+    if: false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/qa-copilot-run
+        with:
+          # Store the project API token generated in the QA Copilot Suite UI
+          # as a GitHub secret named QACS_TOKEN.
+          api-token: ${{ secrets.QACS_TOKEN }}
+          target-url: https://staging.example.com
+          visual: "true"

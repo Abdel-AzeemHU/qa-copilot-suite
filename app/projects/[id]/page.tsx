@@ -144,6 +144,12 @@ export default async function ProjectPage({
           >
             Visual
           </Link>
+          <Link
+            href={`/projects/${project.id}/ci`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            CI / CD
+          </Link>
         </div>
 
         <Card>

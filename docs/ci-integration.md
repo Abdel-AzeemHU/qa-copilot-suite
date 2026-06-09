@@ -1,0 +1,155 @@
+# CI / CD Integration
+
+Run the QA Copilot Suite pipeline (generate → execute → heal → visual → report)
+automatically from your CI on every pull request, and block the PR if it fails.
+
+## 1. Generate a project API token
+
+1. Open your project → **CI / CD**.
+2. Under **CI tokens**, enter a name (e.g. `GitHub Actions CI`) and an optional
+   expiry, then **Generate token**.
+3. The raw token (`qacs_…`) is shown **once**. Copy it immediately — it is never
+   shown again. Only a sha256 hash and an 8-char prefix are stored.
+
+Tokens are **scoped to a single project**. The trigger/results endpoints derive
+the project from the token, so a token can only act on its own project.
+
+Admin or owner role is required to create or revoke tokens.
+
+## 2. GitHub Actions (composite action)
+
+Add the token as a repository secret named `QACS_TOKEN`
+(Settings → Secrets and variables → Actions).
+
+This repo ships a composite action at `.github/actions/qa-copilot-run`. Use it:
+
+```yaml
+name: QA Copilot on PR
+on: pull_request
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/qa-copilot-run
+        with:
+          api-token: ${{ secrets.QACS_TOKEN }}
+          api-base-url: https://app.qacopilot.dev
+          target-url: https://staging.example.com
+          visual: "true"
+          fail-on-regression: "true"
+          timeout-seconds: "600"
+```
+
+Once published to the Marketplace, you can instead reference
+`uses: your-org/qa-copilot-action@v1`.
+
+### Action inputs
+
+| Input                | Required | Default                      | Description                              |
+| -------------------- | -------- | ---------------------------- | ---------------------------------------- |
+| `api-token`          | yes      | —                            | Project API token (use a secret).        |
+| `target-url`         | yes      | —                            | URL under test.                          |
+| `api-base-url`       | no       | `https://app.qacopilot.dev`  | QA Copilot Suite base URL.               |
+| `visual`             | no       | `true`                       | Run visual regression.                   |
+| `fail-on-regression` | no       | `true`                       | Fail the job when the pipeline fails.    |
+| `timeout-seconds`    | no       | `600`                        | Max time to wait for completion.         |
+
+The action triggers a pipeline, polls every 5s until terminal, writes a summary
+(status, stages, link) to `$GITHUB_STEP_SUMMARY`, and exits non-zero on failure
+when `fail-on-regression` is `true`. CI metadata (`ref`, `commit`, `prNumber`)
+is captured automatically from the GitHub event for traceability.
+
+## 3. GitLab CI
+
+```yaml
+qa-copilot:
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache curl jq
+  script:
+    - |
+      RUN=$(curl -sS -X POST "$QACS_BASE_URL/api/ci/trigger" \
+        -H "Authorization: Bearer $QACS_TOKEN" \
+        -H "Content-Type: application/json" \
+        -d "{\"targetUrl\":\"https://staging.example.com\",\"visual\":true,\"ref\":\"$CI_COMMIT_REF_NAME\",\"commit\":\"$CI_COMMIT_SHA\"}")
+      ID=$(echo "$RUN" | jq -r '.pipelineRunId')
+      while true; do
+        RESP=$(curl -sS "$QACS_BASE_URL/api/ci/runs/$ID" -H "Authorization: Bearer $QACS_TOKEN")
+        STATUS=$(echo "$RESP" | jq -r '.status')
+        case "$STATUS" in succeeded|failed|error) break;; esac
+        sleep 5
+      done
+      [ "$(echo "$RESP" | jq -r '.conclusion')" = "success" ]
+```
+
+## 4. Generic curl (any CI)
+
+```bash
+curl -X POST "$QACS_BASE_URL/api/ci/trigger" \
+  -H "Authorization: Bearer $QACS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"targetUrl":"https://staging.example.com","visual":true}'
+```
+
+## 5. API contract
+
+All CI endpoints authenticate via `Authorization: Bearer <token>`.
+
+### POST `/api/ci/trigger`
+
+Request body (JSON):
+
+| Field       | Type    | Required | Notes                                    |
+| ----------- | ------- | -------- | ---------------------------------------- |
+| `targetUrl` | string  | yes      | Must be a valid URL.                     |
+| `autoHeal`  | boolean | no       | Default `true`.                          |
+| `autoBug`   | boolean | no       | Default `true`.                          |
+| `notify`    | boolean | no       | Default `true`.                          |
+| `visual`    | boolean | no       | Run visual regression.                   |
+| `ref`       | string  | no       | CI metadata (branch/tag ref).            |
+| `commit`    | string  | no       | CI metadata (commit SHA).                |
+| `prNumber`  | number  | no       | CI metadata (pull request number).       |
+
+Responses:
+
+- `202 Accepted` — `{ "pipelineRunId": "...", "statusUrl": "/api/ci/runs/<id>" }`
+- `400` — invalid body
+- `401` — missing/invalid/expired token
+- `429` — rate limited (max 30 requests/min per token; `Retry-After` header)
+
+### GET `/api/ci/runs/<id>`
+
+Returns the run, scoped to the token's project (other projects return `404`):
+
+```json
+{
+  "id": "...",
+  "status": "queued | running | succeeded | failed | error",
+  "conclusion": "success | failure | neutral",
+  "summary": "…",
+  "stages": [{ "name": "execute", "status": "succeeded" }],
+  "finalRunId": "…",
+  "bugReportId": null,
+  "url": "https://app.qacopilot.dev/projects/<id>/pipeline"
+}
+```
+
+Conclusion mapping: `succeeded → success`, `failed`/`error` → `failure`,
+everything else → `neutral`. Poll until `status` is terminal
+(`succeeded`/`failed`/`error`), then exit `0` on `success`, `1` otherwise.
+
+## 6. Security notes
+
+- **Project scoping** — tokens act only on their own project; the project is
+  derived from the token, never from a URL parameter.
+- **Storage** — only a sha256 hash and an 8-char prefix are persisted. The raw
+  token is shown once at creation.
+- **Rotation** — generate a new token, update the `QACS_TOKEN` secret, then
+  revoke the old one.
+- **Revocation** — revoking sets `revokedAt`; the token is rejected immediately.
+- **Expiry** — set an optional expiry at creation; expired tokens are rejected.
+- **Rate limiting** — 30 trigger requests per minute per token.
+- **Auditing** — `citoken.create`, `citoken.revoke`, and `ci.trigger` are
+  recorded in the audit log.
+```

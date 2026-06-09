@@ -1,0 +1,40 @@
+name: "QA Copilot Suite Run"
+description: "Trigger a QA Copilot Suite pipeline and wait for the result"
+inputs:
+  api-token:
+    description: "Project API token (store as a secret)"
+    required: true
+  target-url:
+    description: "URL to test"
+    required: true
+  api-base-url:
+    description: "QA Copilot Suite base URL"
+    required: false
+    default: "https://app.qacopilot.dev"
+  visual:
+    description: "Run visual regression"
+    required: false
+    default: "true"
+  fail-on-regression:
+    description: "Fail the job if the pipeline fails"
+    required: false
+    default: "true"
+  timeout-seconds:
+    description: "Max time to wait for completion"
+    required: false
+    default: "600"
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      run: ${{ github.action_path }}/run.sh
+      env:
+        QACS_TOKEN: ${{ inputs.api-token }}
+        QACS_TARGET_URL: ${{ inputs.target-url }}
+        QACS_BASE_URL: ${{ inputs.api-base-url }}
+        QACS_VISUAL: ${{ inputs.visual }}
+        QACS_FAIL: ${{ inputs.fail-on-regression }}
+        QACS_TIMEOUT: ${{ inputs.timeout-seconds }}
+        QACS_REF: ${{ github.ref }}
+        QACS_COMMIT: ${{ github.sha }}
+        QACS_PR_NUMBER: ${{ github.event.pull_request.number }}
