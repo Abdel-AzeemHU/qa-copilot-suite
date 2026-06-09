@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { ExecuteRunner, type PastRun } from "./execute-runner";
 import { ParallelRunner } from "./parallel-runner";
+import { SelectorCachePanel } from "./selector-cache-panel";
 
 interface GeneratedFile {
   filename: string;
@@ -85,6 +86,20 @@ export default async function ExecutePage({
               generatedCode={generatedCode}
               pastRuns={pastRuns}
             />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Selector Healing</CardTitle>
+            <CardDescription>
+              Layer 1 fine-grained healing — selectors repaired automatically
+              mid-run are cached here. Remove an entry to force a fresh LLM
+              lookup on the next run.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SelectorCachePanel projectId={project.id} />
           </CardContent>
         </Card>
 

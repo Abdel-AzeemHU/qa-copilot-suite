@@ -16,6 +16,9 @@ vi.mock("@/lib/db/prisma", () => ({
       findUnique: (...args: unknown[]) => findUnique(...args),
       update: (...args: unknown[]) => update(...args),
     },
+    project: {
+      findUnique: vi.fn().mockResolvedValue(null),
+    },
   },
 }));
 

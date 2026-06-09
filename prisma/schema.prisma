@@ -96,6 +96,7 @@ model Project {
   pipelineRuns   PipelineRun[]
   parallelBatches ParallelBatch[]
   schedules      Schedule[]
+  selectorCache  SelectorCache[]
 
   @@index([orgId])
 }
@@ -367,6 +368,22 @@ model Schedule {
 
   @@index([projectId])
   @@index([nextRunAt])
+}
+
+model SelectorCache {
+  id               String   @id @default(cuid())
+  projectId        String
+  originalSelector String
+  healedSelector   String
+  strategy         String   // "testid" | "role" | "label" | "text" | "css"
+  confidence       Float    @default(1.0)
+  hitCount         Int      @default(1)
+  lastUsedAt       DateTime @default(now())
+  createdAt        DateTime @default(now())
+  project          Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, originalSelector])
+  @@index([projectId])
 }
 
 model AuditLog {
