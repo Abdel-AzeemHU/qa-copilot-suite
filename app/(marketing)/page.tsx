@@ -11,6 +11,12 @@ export const metadata: Metadata = {
   title: "QA Copilot Suite — Closed-loop QA automation",
   description:
     "Generate test cases, write automation code, run it live, heal what breaks, and trace everything back to the requirement.",
+  openGraph: {
+    title: "QA Copilot Suite — Closed-loop QA automation",
+    description:
+      "Generate test cases, write automation code, run it live, heal what breaks, and trace everything back to the requirement.",
+    type: "website",
+  },
 };
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
@@ -55,25 +61,28 @@ export default function Home() {
                 href="/register"
                 className="rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-emerald-400 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-transform hover:scale-[1.03]"
               >
-                Start Generating →
+                Start Free →
               </Link>
               <a
                 href="#workflow-demo"
                 className="rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/5"
               >
-                See How It Works
+                See it work ↓
               </a>
             </div>
-            <div className="mt-8 flex flex-wrap items-center gap-3 text-xs text-slate-400">
-              <span className="rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1">
-                Powered by Claude
-              </span>
-              <span className="rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1">
-                claude-opus-4-8
-              </span>
-              <span className="rounded-md border border-white/10 bg-white/[0.03] px-2.5 py-1">
-                Bring your own key
-              </span>
+            <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400">
+              {[
+                "Works with Playwright",
+                "Claude & OpenAI",
+                "Jira",
+                "Slack",
+                "GitHub",
+              ].map((item, i, arr) => (
+                <span key={item} className="flex items-center gap-2">
+                  <span className="text-slate-300">{item}</span>
+                  {i < arr.length - 1 && <span className="text-slate-600">•</span>}
+                </span>
+              ))}
             </div>
           </div>
           <HeroCarousel />
@@ -95,6 +104,14 @@ export default function Home() {
             </p>
           </div>
           <WorkflowDemo />
+          <div className="mt-10 text-center">
+            <Link
+              href="/register"
+              className="inline-block rounded-full border border-indigo-400/40 bg-indigo-500/10 px-6 py-3 text-sm font-semibold text-indigo-300 transition-colors hover:bg-indigo-500/20 hover:text-indigo-200"
+            >
+              Start your first pipeline →
+            </Link>
+          </div>
         </div>
       </section>
 

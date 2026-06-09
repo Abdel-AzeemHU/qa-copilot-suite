@@ -4,6 +4,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Features — QA Copilot Suite",
   description: "12 capabilities across a closed-loop QA pipeline — from requirement to verified test.",
+  openGraph: {
+    title: "Features — QA Copilot Suite",
+    description: "12 capabilities across a closed-loop QA pipeline — from requirement to verified test.",
+    type: "website",
+  },
 };
 
 function SvgIcon({ d, className = "h-5 w-5" }: { d: string; className?: string }) {
@@ -86,6 +91,34 @@ const GROUPS = [
         name: "Bug Reporter",
         desc: "Convert failing runs into structured bug reports with severity, reproduction steps, screenshots, and labels — filed automatically.",
         badge: "Execution",
+      },
+    ],
+  },
+  {
+    id: "intelligence",
+    label: "Intelligence Layer",
+    color: "from-indigo-500 to-blue-600",
+    textColor: "text-indigo-400",
+    borderColor: "border-indigo-500/30",
+    bgColor: "bg-indigo-500/10",
+    features: [
+      {
+        icon: "M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
+        name: "Static Review",
+        desc: "AI peer-reviews your test plans and automation code, flagging redundant cases, assertion gaps, and poor selector hygiene before you ever run.",
+        badge: "Intelligence",
+      },
+      {
+        icon: "M3 3v18h18M7 14l4-4 3 3 5-6",
+        name: "Traceability Spine",
+        desc: "Every generated test links back to the requirement that spawned it. Coverage is provable, not assumed — with drill-down to the exact acceptance criteria.",
+        badge: "Intelligence",
+      },
+      {
+        icon: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z",
+        name: "QA Chat Assist",
+        desc: "Ask plain-language questions about your coverage, get suggestions for edge cases, and explore what's tested vs. what's missing — in a conversational interface.",
+        badge: "Intelligence",
       },
     ],
   },
