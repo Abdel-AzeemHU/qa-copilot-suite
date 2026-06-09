@@ -19,6 +19,10 @@ function eventEntity(event: IntegrationEvent): Record<string, unknown> {
       return { bugReport: event.bugReport };
     case "test":
       return { message: event.message };
+    case "testcases.generated":
+      return { testCases: event.testCases, sourceStoryKey: event.sourceStoryKey };
+    default:
+      return {};
   }
 }
 

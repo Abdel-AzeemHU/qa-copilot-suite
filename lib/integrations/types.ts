@@ -15,9 +15,16 @@ export interface BugReportSummary {
   output: string; // JSON-encoded BugReporterOutput-ish blob
 }
 
+export interface TestCaseItem {
+  title: string;
+  steps?: string[];
+  expectedResult?: string | null;
+}
+
 export type IntegrationEvent =
   | { type: "run.completed"; run: RunSummary }
   | { type: "bug.created"; bugReport: BugReportSummary }
+  | { type: "testcases.generated"; projectId: string; testCases: TestCaseItem[]; sourceStoryKey?: string }
   | { type: "test"; message: string };
 
 export interface IntegrationRecord {

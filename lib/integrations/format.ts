@@ -25,6 +25,10 @@ export function formatEventText(event: IntegrationEvent): string {
       return formatBugCreatedText(event.bugReport);
     case "test":
       return event.message;
+    case "testcases.generated":
+      return `Generated ${event.testCases.length} test case(s)` + (event.sourceStoryKey ? ` for story ${event.sourceStoryKey}` : "");
+    default:
+      return "Integration event";
   }
 }
 

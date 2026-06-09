@@ -95,16 +95,17 @@ function Card({ k, name, d }: { k: string; name: string; d: string }) {
 }
 
 const stats = [
-  { n: "10", l: "Modules", d: "M4 4h16v16H4z M4 12h16M12 4v16" },
-  { n: "5-Step", l: "Closed Loop", d: "M21 12a9 9 0 1 1-3-6.7M21 3v6h-6" },
+  { n: "12", l: "Workflow Steps", d: "M4 4h16v16H4z M4 12h16M12 4v16" },
+  { n: "5-Stage", l: "Closed Loop", d: "M21 12a9 9 0 1 1-3-6.7M21 3v6h-6" },
   { n: "3", l: "Frameworks", d: "m18 16 4-4-4-4M6 8l-4 4 4 4M14.5 4l-5 16" },
   { n: "100%", l: "Traceable", d: "M20 6 9 17l-5-5" },
+  { n: "AI", l: "Self-Healing", d: "M21 12a9 9 0 1 1-3-6.7M21 3v6h-6" },
   { n: "BYOK", l: "Your Own Key", d: "M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3" },
 ];
 
 export function StatsBar() {
   return (
-    <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+    <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
       {stats.map((s) => (
         <div key={s.l} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 text-center">
           <span className="mx-auto grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-indigo-500/20 to-emerald-400/20 text-emerald-300">

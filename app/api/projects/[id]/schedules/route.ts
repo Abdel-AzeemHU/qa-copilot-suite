@@ -1,19 +1,17 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db/prisma";
-import { encrypt } from "@/lib/crypto";
-import { serializeIntegration } from "@/lib/integrations/serialize";
 import { requireOrgRole } from "@/lib/data";
+import { computeNextRun } from "@/worker/scheduler";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { logAudit } from "@/lib/audit";
-
-const TYPES = ["slack", "github", "webhook", "jira"] as const;
 
 const createSchema = z.object({
-  type: z.enum(TYPES),
-  name: z.string().min(1, "Name is required").max(120),
-  config: z.record(z.string(), z.unknown()).optional().default({}),
-  secret: z.string().trim().optional(),
+  name: z.string().min(1).max(120),
+  cronExpr: z.string().min(1),
+  targetUrl: z.string().url(),
+  autoHeal: z.boolean().optional().default(true),
+  autoBug: z.boolean().optional().default(true),
+  notify: z.boolean().optional().default(true),
 });
 
 async function getOwnedProject(projectId: string, userId: string) {
@@ -31,19 +29,17 @@ export async function GET(
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
   const { id } = await params;
   const project = await getOwnedProject(id, session.user.id);
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
 
-  const integrations = await prisma.integration.findMany({
+  const schedules = await prisma.schedule.findMany({
     where: { projectId: id },
     orderBy: { createdAt: "desc" },
   });
-
-  return NextResponse.json(integrations.map(serializeIntegration));
+  return NextResponse.json(schedules);
 }
 
 export async function POST(
@@ -54,17 +50,13 @@ export async function POST(
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
   const { id } = await params;
   const project = await getOwnedProject(id, session.user.id);
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
   if (!(await requireOrgRole(session.user.id, project.orgId, "admin"))) {
-    return NextResponse.json(
-      { error: "Managing integrations requires an admin or owner role." },
-      { status: 403 },
-    );
+    return NextResponse.json({ error: "Admin role required" }, { status: 403 });
   }
 
   const body = await req.json().catch(() => null);
@@ -76,27 +68,25 @@ export async function POST(
     );
   }
 
-  const { type, name, config, secret } = parsed.data;
+  let nextRunAt: Date;
+  try {
+    nextRunAt = computeNextRun(parsed.data.cronExpr);
+  } catch {
+    return NextResponse.json({ error: "Invalid cron expression" }, { status: 400 });
+  }
 
-  const integration = await prisma.integration.create({
+  const schedule = await prisma.schedule.create({
     data: {
       projectId: id,
-      type,
-      name,
-      config: JSON.stringify(config ?? {}),
-      encryptedSecret: secret ? encrypt(secret) : null,
+      name: parsed.data.name,
+      cronExpr: parsed.data.cronExpr,
+      targetUrl: parsed.data.targetUrl,
+      autoHeal: parsed.data.autoHeal,
+      autoBug: parsed.data.autoBug,
+      notify: parsed.data.notify,
+      nextRunAt,
     },
   });
 
-  logAudit({
-    orgId: project.orgId,
-    userId: session.user.id,
-    action: "integration.create",
-    entityType: "Integration",
-    entityId: integration.id,
-    meta: { type },
-    ip: req.headers.get("x-forwarded-for") ?? undefined,
-  });
-
-  return NextResponse.json(serializeIntegration(integration), { status: 201 });
+  return NextResponse.json(schedule, { status: 201 });
 }

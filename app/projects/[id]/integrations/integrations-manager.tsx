@@ -19,10 +19,20 @@ export interface IntegrationView {
   createdAt: string;
 }
 
+export interface JiraStory {
+  id: string;
+  key: string;
+  summary: string;
+  description: string | null;
+  status: string;
+  issueType: string;
+}
+
 const TYPES = [
   { value: "slack", label: "Slack" },
   { value: "github", label: "GitHub" },
   { value: "webhook", label: "Generic webhook" },
+  { value: "jira", label: "Jira" },
 ] as const;
 
 type IntegrationType = (typeof TYPES)[number]["value"];
@@ -57,6 +67,12 @@ function configSummary(type: string, config: Record<string, unknown>): string {
     const repo = typeof config.repo === "string" ? config.repo : null;
     return repo ? `Repo: ${repo}` : "No repo configured";
   }
+  if (type === "jira") {
+    const domain = typeof config.domain === "string" ? config.domain : null;
+    const projectKey = typeof config.projectKey === "string" ? config.projectKey : null;
+    if (domain && projectKey) return `${domain}.atlassian.net / ${projectKey}`;
+    return "Jira workspace configured";
+  }
   const url = typeof config.url === "string" ? config.url : null;
   return url ?? "No URL configured";
 }
@@ -77,11 +93,18 @@ export function IntegrationsManager({
   const [repo, setRepo] = useState("");
   const [url, setUrl] = useState("");
   const [secret, setSecret] = useState("");
+  // Jira-specific
+  const [jiraDomain, setJiraDomain] = useState("");
+  const [jiraProjectKey, setJiraProjectKey] = useState("");
+  const [jiraEmail, setJiraEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [actionState, setActionState] = useState<
     Record<string, { busy: boolean; message: string | null }>
   >({});
+  // Jira stories
+  const [jiraStories, setJiraStories] = useState<JiraStory[] | null>(null);
+  const [fetchingStories, setFetchingStories] = useState<Record<string, boolean>>({});
 
   const resetForm = () => {
     setName("");
@@ -89,12 +112,17 @@ export function IntegrationsManager({
     setRepo("");
     setUrl("");
     setSecret("");
+    setJiraDomain("");
+    setJiraProjectKey("");
+    setJiraEmail("");
     setFormError(null);
   };
 
   const buildConfig = (): Record<string, unknown> => {
     if (type === "slack") return channel ? { channel } : {};
     if (type === "github") return repo ? { repo } : {};
+    if (type === "jira")
+      return { domain: jiraDomain.trim(), projectKey: jiraProjectKey.trim(), email: jiraEmail.trim() };
     return url ? { url } : {};
   };
 
@@ -116,6 +144,10 @@ export function IntegrationsManager({
     }
     if (type === "webhook" && !url.trim()) {
       setFormError("A URL is required");
+      return;
+    }
+    if (type === "jira" && (!jiraDomain.trim() || !jiraProjectKey.trim() || !jiraEmail.trim() || !secret.trim())) {
+      setFormError("Domain, project key, email, and API token are all required for Jira");
       return;
     }
 
@@ -202,7 +234,6 @@ export function IntegrationsManager({
           ? "Test sent successfully"
           : `Test failed: ${data.error ?? "unknown error"}`;
       setBusy(integration.id, false, message);
-      // refresh status badge
       setIntegrations((prev) =>
         prev.map((i) =>
           i.id === integration.id
@@ -221,6 +252,29 @@ export function IntegrationsManager({
         false,
         `Test failed: ${err instanceof Error ? err.message : "unknown error"}`,
       );
+    }
+  };
+
+  const handleFetchStories = async (integration: IntegrationView) => {
+    setFetchingStories((prev) => ({ ...prev, [integration.id]: true }));
+    setJiraStories(null);
+    try {
+      const res = await fetch(`/api/projects/${projectId}/jira/stories`);
+      if (!res.ok) {
+        const data = (await res.json()) as { error?: string };
+        setBusy(integration.id, false, `Failed: ${data.error ?? "unknown"}`);
+        return;
+      }
+      const stories = (await res.json()) as JiraStory[];
+      setJiraStories(stories);
+    } catch (err) {
+      setBusy(
+        integration.id,
+        false,
+        `Failed: ${err instanceof Error ? err.message : "unknown"}`,
+      );
+    } finally {
+      setFetchingStories((prev) => ({ ...prev, [integration.id]: false }));
     }
   };
 
@@ -354,6 +408,56 @@ export function IntegrationsManager({
             </>
           ) : null}
 
+          {type === "jira" ? (
+            <>
+              <div className="space-y-1.5">
+                <Label htmlFor="jira-domain">Jira domain (subdomain only)</Label>
+                <Input
+                  id="jira-domain"
+                  value={jiraDomain}
+                  onChange={(e) => setJiraDomain(e.target.value)}
+                  placeholder="mycompany"
+                  required
+                />
+                <p className="text-xs text-neutral-500">
+                  e.g. for mycompany.atlassian.net enter &quot;mycompany&quot;
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="jira-project-key">Project key</Label>
+                <Input
+                  id="jira-project-key"
+                  value={jiraProjectKey}
+                  onChange={(e) => setJiraProjectKey(e.target.value)}
+                  placeholder="PROJ"
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="jira-email">Jira account email</Label>
+                <Input
+                  id="jira-email"
+                  type="email"
+                  value={jiraEmail}
+                  onChange={(e) => setJiraEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="jira-token">API token</Label>
+                <Input
+                  id="jira-token"
+                  type="password"
+                  value={secret}
+                  onChange={(e) => setSecret(e.target.value)}
+                  placeholder="Jira API token (from id.atlassian.com)"
+                  required
+                />
+              </div>
+            </>
+          ) : null}
+
           {formError ? (
             <p className="text-sm text-red-600">{formError}</p>
           ) : null}
@@ -372,6 +476,7 @@ export function IntegrationsManager({
         <ul className="space-y-3">
           {integrations.map((integration) => {
             const state = actionState[integration.id];
+            const isFetching = fetchingStories[integration.id];
             return (
               <li
                 key={integration.id}
@@ -413,15 +518,27 @@ export function IntegrationsManager({
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      disabled={state?.busy}
-                      onClick={() => handleTest(integration)}
-                    >
-                      Send test
-                    </Button>
+                    {integration.type !== "jira" ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={state?.busy}
+                        onClick={() => handleTest(integration)}
+                      >
+                        Send test
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        disabled={isFetching}
+                        onClick={() => handleFetchStories(integration)}
+                      >
+                        {isFetching ? "Fetching…" : "Fetch Stories"}
+                      </Button>
+                    )}
                     <Button
                       type="button"
                       size="sm"
@@ -452,6 +569,30 @@ export function IntegrationsManager({
                   >
                     {state.message}
                   </p>
+                ) : null}
+
+                {/* Jira stories list */}
+                {integration.type === "jira" && jiraStories !== null ? (
+                  <div className="mt-2 space-y-1 rounded-md bg-neutral-50 p-3">
+                    <p className="text-xs font-medium text-neutral-600">
+                      Imported stories ({jiraStories.length})
+                    </p>
+                    {jiraStories.length === 0 ? (
+                      <p className="text-xs text-neutral-500">No stories found.</p>
+                    ) : (
+                      <ul className="space-y-1">
+                        {jiraStories.map((s) => (
+                          <li key={s.id} className="text-xs">
+                            <span className="font-mono text-neutral-500">{s.key}</span>{" "}
+                            <span>{s.summary}</span>{" "}
+                            <Badge variant="secondary" className="text-[10px]">
+                              {s.status}
+                            </Badge>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 ) : null}
               </li>
             );

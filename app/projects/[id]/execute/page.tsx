@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { ExecuteRunner, type PastRun } from "./execute-runner";
+import { ParallelRunner } from "./parallel-runner";
 
 interface GeneratedFile {
   filename: string;
@@ -84,6 +85,19 @@ export default async function ExecutePage({
               generatedCode={generatedCode}
               pastRuns={pastRuns}
             />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Parallel Run</CardTitle>
+            <CardDescription>
+              Run against multiple target URLs simultaneously (up to 5). Each URL
+              gets its own execution run tracked independently.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ParallelRunner projectId={project.id} />
           </CardContent>
         </Card>
       </main>

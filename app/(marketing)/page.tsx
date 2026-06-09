@@ -2,9 +2,10 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { HeroCarousel } from "@/components/marketing/hero-carousel";
 import { ClosedLoop } from "@/components/marketing/closed-loop";
-import { LiveDemo } from "@/components/marketing/live-demo";
+import { WorkflowDemo } from "@/components/marketing/workflow-demo";
 import { ModulesBento, StatsBar } from "@/components/marketing/modules-bento";
 import { ProblemTabs } from "@/components/marketing/problem-tabs";
+import { SocialProof } from "@/components/marketing/social-proof";
 
 export const metadata: Metadata = {
   title: "QA Copilot Suite — Closed-loop QA automation",
@@ -57,7 +58,7 @@ export default function Home() {
                 Start Generating →
               </Link>
               <a
-                href="#live-demo"
+                href="#workflow-demo"
                 className="rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-slate-200 transition-colors hover:bg-white/5"
               >
                 See How It Works
@@ -79,8 +80,26 @@ export default function Home() {
         </div>
       </section>
 
+      {/* WORKFLOW DEMO — 12-step interactive */}
+      <section id="workflow-demo" className="scroll-mt-20 border-y border-white/10 bg-white/[0.015] py-20">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <div className="mb-12 text-center">
+            <Eyebrow>Interactive workflow</Eyebrow>
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              See every step of the workflow
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-slate-300">
+              Walk through all 12 stages — from connecting your repo to
+              fully-automated, always-on QA — with live activity and real
+              metrics at each step.
+            </p>
+          </div>
+          <WorkflowDemo />
+        </div>
+      </section>
+
       {/* CLOSED LOOP */}
-      <section className="border-y border-white/10 bg-white/[0.015] py-20">
+      <section className="py-20">
         <div className="mx-auto max-w-7xl px-5 text-center sm:px-8">
           <Eyebrow>The differentiator</Eyebrow>
           <h2 className="mx-auto max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -99,30 +118,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* LIVE DEMO */}
-      <section id="live-demo" className="scroll-mt-20 py-20">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <div className="mb-12 text-center">
-            <Eyebrow>Interactive demo</Eyebrow>
-            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Watch AI Generate Tests in Real-Time
-            </h2>
-            <p className="mx-auto mt-4 max-w-2xl text-slate-300">
-              Pick a scenario, hit generate, and see a prioritized test suite
-              appear — exactly how it works inside the app.
-            </p>
-          </div>
-          <LiveDemo />
-        </div>
-      </section>
-
       {/* MODULES */}
       <section className="border-y border-white/10 bg-white/[0.015] py-20">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="mb-12 text-center">
             <Eyebrow>The suite</Eyebrow>
             <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Ten modules, one closed loop
+              Twelve capabilities, one closed loop
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-slate-300">
               Each module hands off to the next — from the first requirement to
@@ -154,6 +156,11 @@ export default function Home() {
           </div>
           <ProblemTabs />
         </div>
+      </section>
+
+      {/* SOCIAL PROOF */}
+      <section className="border-t border-white/10">
+        <SocialProof />
       </section>
 
       {/* FINAL CTA */}

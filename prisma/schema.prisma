@@ -94,6 +94,8 @@ model Project {
   executionRuns  ExecutionRun[]
   integrations   Integration[]
   pipelineRuns   PipelineRun[]
+  parallelBatches ParallelBatch[]
+  schedules      Schedule[]
 
   @@index([orgId])
 }
@@ -166,6 +168,8 @@ model ExecutionRun {
   screenshotPath String?
   startedAt      DateTime?
   completedAt    DateTime?
+  batchId        String?
+  batch          ParallelBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
   createdAt      DateTime  @default(now())
   testCases      TestCase[] // which test cases this run covers
 
@@ -331,6 +335,38 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model ParallelBatch {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  status      String   @default("running") // running | done | error
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+  runs        ExecutionRun[]
+
+  @@index([projectId])
+}
+
+model Schedule {
+  id         String    @id @default(cuid())
+  projectId  String
+  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name       String
+  enabled    Boolean   @default(true)
+  cronExpr   String
+  targetUrl  String
+  autoHeal   Boolean   @default(true)
+  autoBug    Boolean   @default(true)
+  notify     Boolean   @default(true)
+  lastRunAt  DateTime?
+  nextRunAt  DateTime?
+  lastStatus String?
+  createdAt  DateTime  @default(now())
+
+  @@index([projectId])
+  @@index([nextRunAt])
 }
 
 model AuditLog {
