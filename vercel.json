@@ -1,0 +1,13 @@
+{
+  "buildCommand": "npx prisma generate && npm run build",
+  "installCommand": "npm ci",
+  "framework": "nextjs",
+  "env": {
+    "NEXTAUTH_URL": "@nextauth_url",
+    "AUTH_SECRET": "@auth_secret",
+    "ENCRYPTION_KEY": "@encryption_key",
+    "DATABASE_URL": "@database_url",
+    "DIRECT_URL": "@direct_url",
+    "NEXT_PUBLIC_APP_URL": "@app_url"
+  }
+}

@@ -1,16 +1,19 @@
-import path from "path";
 import { PrismaClient } from "@prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 
-// Resolve DB path relative to project root so it's stable regardless of cwd.
-const rawUrl = process.env.DATABASE_URL ?? "file:./prisma/dev.db";
-const databaseUrl = rawUrl.startsWith("file:./")
-  ? `file:${path.resolve(process.cwd(), rawUrl.slice(7))}`
-  : rawUrl;
+if (!process.env.DATABASE_URL) {
+  throw new Error(
+    "DATABASE_URL env var is not set. See .env.local.example for setup instructions.",
+  );
+}
 
 const createPrismaClient = (): PrismaClient => {
-  const adapter = new PrismaBetterSqlite3({ url: databaseUrl });
-  return new PrismaClient({ adapter });
+  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+  return new PrismaClient({
+    adapter,
+    log:
+      process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+  });
 };
 
 const globalForPrisma = globalThis as unknown as {
