@@ -103,6 +103,12 @@ export default async function ProjectPage({
             QA Chat
           </Link>
           <Link
+            href={`/projects/${project.id}/record`}
+            className={buttonVariants({ variant: "default" })}
+          >
+            ● Record a Test
+          </Link>
+          <Link
             href={`/projects/${project.id}/execute`}
             className={buttonVariants({ variant: "outline" })}
           >
