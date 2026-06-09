@@ -150,6 +150,12 @@ export default async function ProjectPage({
           >
             CI / CD
           </Link>
+          <Link
+            href={`/projects/${project.id}/flakiness`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Flakiness
+          </Link>
         </div>
 
         <Card>
