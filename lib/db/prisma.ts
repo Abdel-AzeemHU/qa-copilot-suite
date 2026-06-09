@@ -1,5 +1,7 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaPg } from "@prisma/adapter-pg";
+import Database from "better-sqlite3";
 
 if (!process.env.DATABASE_URL) {
   throw new Error(
@@ -8,7 +10,21 @@ if (!process.env.DATABASE_URL) {
 }
 
 const createPrismaClient = (): PrismaClient => {
-  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+  const url = process.env.DATABASE_URL!;
+
+  if (url.startsWith("file:")) {
+    const dbPath = url.replace("file:", "");
+    const db = new Database(dbPath);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const adapter = new PrismaBetterSqlite3(db as any);
+    return new PrismaClient({
+      adapter,
+      log:
+        process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+    });
+  }
+
+  const adapter = new PrismaPg({ connectionString: url });
   return new PrismaClient({
     adapter,
     log:
