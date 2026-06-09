@@ -5,15 +5,14 @@ import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/db/prisma";
-import { encrypt, decrypt } from "@/lib/crypto";
+import { encrypt } from "@/lib/crypto";
 import { signIn } from "@/auth";
 import {
   requireUserId,
   getOrCreateDefaultOrg,
   getProjectForUser,
-  getClaudeApiKeyRecord,
 } from "@/lib/data";
-import { ClaudeProvider } from "@/lib/ai/claude";
+import { getProviderForUser } from "@/lib/ai/get-provider";
 import { runHelper } from "@/lib/ai/run-helper";
 import {
   testCaseGeneratorHelper,
@@ -178,30 +177,20 @@ export async function generateTestCasesAction(
     return { error: "Project not found" };
   }
 
-  // Resolve API key: a freshly provided key is stored (encrypted) and used;
-  // otherwise fall back to the stored key.
-  let resolvedKey = apiKey?.trim() || "";
-  if (resolvedKey) {
-    const encryptedKey = encrypt(resolvedKey);
+  // If a fresh API key was provided inline, store it as claude key before resolving.
+  const inlineKey = apiKey?.trim() || "";
+  if (inlineKey) {
+    const encryptedKey = encrypt(inlineKey);
     await prisma.apiKey.upsert({
       where: { userId_provider: { userId, provider: "claude" } },
       create: { userId, provider: "claude", encryptedKey },
       update: { encryptedKey },
     });
-  } else {
-    const record = await getClaudeApiKeyRecord(userId);
-    if (!record) {
-      return {
-        error:
-          "No Claude API key found. Paste one into the API key field to continue.",
-      };
-    }
-    resolvedKey = decrypt(record.encryptedKey);
   }
 
   let output;
   try {
-    const provider = new ClaudeProvider(resolvedKey);
+    const provider = await getProviderForUser(userId);
     output = await runHelper(
       testCaseGeneratorHelper,
       { requirement, targetUrl: targetUrl ?? "" },

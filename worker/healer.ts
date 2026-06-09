@@ -1,7 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
-import { decrypt } from "@/lib/crypto";
-import { getClaudeApiKeyRecord } from "@/lib/data";
-import { ClaudeProvider } from "@/lib/ai/claude";
+import { getProviderForOwner } from "@/lib/ai/get-provider";
 import { runHelper } from "@/lib/ai/run-helper";
 import { selfHealerHelper } from "@/lib/helpers/self-healer";
 import { executeRun } from "./executor";
@@ -32,15 +30,8 @@ export async function runHealingAttempt(attemptId: string): Promise<void> {
   const run = attempt.executionRun;
 
   try {
-    const ownerId = run.project.organization.ownerId;
-    const record = await getClaudeApiKeyRecord(ownerId);
-    if (!record) {
-      throw new Error(
-        "No Claude API key found for the project owner. Add one in settings to enable self-healing.",
-      );
-    }
-    const apiKey = decrypt(record.encryptedKey);
-    const provider = new ClaudeProvider(apiKey);
+    const orgId = run.project.organization.id;
+    const provider = await getProviderForOwner(orgId);
 
     const linkedTestCase = run.testCases[0];
     const requirement =

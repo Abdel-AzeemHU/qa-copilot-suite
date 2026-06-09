@@ -2,13 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db/prisma";
-import { decrypt } from "@/lib/crypto";
 import {
   requireUserId,
   getProjectForUser,
-  getClaudeApiKeyRecord,
 } from "@/lib/data";
-import { ClaudeProvider } from "@/lib/ai/claude";
+import { getProviderForUser } from "@/lib/ai/get-provider";
 import { dispatchIntegrationEvent } from "@/lib/integrations/dispatch";
 import { runHelper } from "@/lib/ai/run-helper";
 import type { LLMProvider } from "@/lib/ai/provider";
@@ -32,21 +30,23 @@ export interface ActionResult {
 }
 
 /**
- * Resolves the user's Claude provider using their stored, encrypted API key.
+ * Resolves the user's active LLM provider using their stored, encrypted API key.
  * Returns either a provider or an error message.
  */
 async function resolveProvider(
   userId: string,
 ): Promise<{ provider?: LLMProvider; error?: string }> {
-  const record = await getClaudeApiKeyRecord(userId);
-  if (!record) {
+  try {
+    const provider = await getProviderForUser(userId);
+    return { provider };
+  } catch (err) {
     return {
       error:
-        "No Claude API key found. Add one on the Generate test cases page first.",
+        err instanceof Error
+          ? err.message
+          : "No API key found. Add one in Settings to continue.",
     };
   }
-  const key = decrypt(record.encryptedKey);
-  return { provider: new ClaudeProvider(key) };
 }
 
 // --- Automation code generator ---

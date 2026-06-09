@@ -10,11 +10,12 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String?
-  createdAt    DateTime @default(now())
+  id             String   @id @default(cuid())
+  email          String   @unique
+  passwordHash   String
+  name           String?
+  activeProvider String   @default("claude")
+  createdAt      DateTime @default(now())
 
   organizations Organization[]
   apiKeys       ApiKey[]
@@ -285,6 +286,7 @@ model ApiKey {
   userId       String
   provider     String // "claude" | "openai"
   encryptedKey String
+  config       String? // JSON e.g. { "model": "gpt-4o-mini" }
   createdAt    DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -1,8 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db/prisma";
 import { decrypt } from "@/lib/crypto";
-import { getProjectChatContext, getClaudeApiKeyRecord } from "@/lib/data";
+import { getProjectChatContext } from "@/lib/data";
 
 const MODEL = "claude-opus-4-8";
 
@@ -74,11 +75,35 @@ export async function POST(
     return new Response("A message is required", { status: 400 });
   }
 
-  const keyRecord = await getClaudeApiKeyRecord(session.user.id);
+  // Resolve the active provider key record for this user.
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { activeProvider: true },
+  });
+  const activeProvider = user?.activeProvider ?? "claude";
+
+  const keyRecord = await prisma.apiKey.findFirst({
+    where: { userId: session.user.id, provider: activeProvider },
+    select: { encryptedKey: true, provider: true, config: true },
+  });
   if (!keyRecord) {
-    return new Response("No Claude API key found", { status: 400 });
+    // Fall back to any stored key.
+    const fallbackRecord = await prisma.apiKey.findFirst({
+      where: { userId: session.user.id },
+      select: { encryptedKey: true, provider: true, config: true },
+    });
+    if (!fallbackRecord) {
+      return new Response("No API key found. Add one in Settings.", { status: 400 });
+    }
+    Object.assign(keyRecord ?? {}, fallbackRecord);
+  }
+  if (!keyRecord) {
+    return new Response("No API key found. Add one in Settings.", { status: 400 });
   }
   const apiKey = decrypt(keyRecord.encryptedKey);
+  const modelFromConfig = keyRecord.config
+    ? (JSON.parse(keyRecord.config) as { model?: string }).model
+    : undefined;
 
   // Persist the user's message.
   await prisma.chatMessage.create({
@@ -91,7 +116,6 @@ export async function POST(
     content: m.content,
   }));
 
-  const client = new Anthropic({ apiKey });
   const encoder = new TextEncoder();
 
   const stream = new ReadableStream<Uint8Array>({
@@ -101,20 +125,43 @@ export async function POST(
         controller.enqueue(encoder.encode(`data: ${data}\n\n`));
 
       try {
-        const messageStream = client.messages.stream({
-          model: MODEL,
-          max_tokens: 4096,
-          system: systemPrompt,
-          messages: [...history, { role: "user", content: message }],
-        });
-
-        for await (const event of messageStream) {
-          if (
-            event.type === "content_block_delta" &&
-            event.delta.type === "text_delta"
-          ) {
-            assistantText += event.delta.text;
-            sse(JSON.stringify(event.delta.text));
+        if (keyRecord.provider === "openai") {
+          const openaiClient = new OpenAI({ apiKey });
+          const openaiModel = modelFromConfig ?? "gpt-4o";
+          const openaiStream = await openaiClient.chat.completions.create({
+            model: openaiModel,
+            max_tokens: 4096,
+            stream: true,
+            messages: [
+              { role: "system", content: systemPrompt },
+              ...history,
+              { role: "user", content: message },
+            ],
+          });
+          for await (const chunk of openaiStream) {
+            const text = chunk.choices[0]?.delta?.content ?? "";
+            if (text) {
+              assistantText += text;
+              sse(JSON.stringify(text));
+            }
+          }
+        } else {
+          const claudeClient = new Anthropic({ apiKey });
+          const claudeModel = modelFromConfig ?? MODEL;
+          const messageStream = claudeClient.messages.stream({
+            model: claudeModel,
+            max_tokens: 4096,
+            system: systemPrompt,
+            messages: [...history, { role: "user", content: message }],
+          });
+          for await (const event of messageStream) {
+            if (
+              event.type === "content_block_delta" &&
+              event.delta.type === "text_delta"
+            ) {
+              assistantText += event.delta.text;
+              sse(JSON.stringify(event.delta.text));
+            }
           }
         }
         sse("[DONE]");

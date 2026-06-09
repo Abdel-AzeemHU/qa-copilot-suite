@@ -49,6 +49,10 @@ vi.mock("@/lib/ai/claude", () => ({
   },
 }));
 
+vi.mock("@/lib/ai/get-provider", () => ({
+  getProviderForOwner: vi.fn(async () => ({ name: "claude" })),
+}));
+
 const generateStructured = vi.fn();
 vi.mock("@/lib/ai/run-helper", async () => {
   const actual = await vi.importActual<typeof import("@/lib/ai/run-helper")>(
