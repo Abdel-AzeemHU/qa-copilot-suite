@@ -156,6 +156,12 @@ export default async function ProjectPage({
           >
             Flakiness
           </Link>
+          <Link
+            href={`/projects/${project.id}/api-tests`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            API Testing
+          </Link>
         </div>
 
         <Card>
