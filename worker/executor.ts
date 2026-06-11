@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db/prisma";
 import { dispatchIntegrationEvent } from "@/lib/integrations/dispatch";
 import { healSelector } from "@/lib/selector-healing/heal-selector";
 import { buildHealingShim } from "@/lib/selector-healing/shim";
+import { classifyRunFailure } from "@/worker/classifier";
 
 /**
  * Executes an ExecutionRun's generated automation code as a Node.js script.
@@ -210,6 +211,11 @@ export async function executeRun(runId: string): Promise<void> {
         errorMessage: null,
       },
     }).catch(() => {});
+
+    // Fire-and-forget failure classification (real_bug | flaky | environment | automation)
+    if (result === "failed") {
+      void classifyRunFailure(runId);
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     await prisma.executionRun.update({
@@ -233,6 +239,8 @@ export async function executeRun(runId: string): Promise<void> {
         errorMessage: message,
       },
     }).catch(() => {});
+
+    void classifyRunFailure(runId);
   } finally {
     if (healServer) {
       healServer.close();

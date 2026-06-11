@@ -29,6 +29,9 @@ export async function GET(
       startedAt: true,
       completedAt: true,
       createdAt: true,
+      failureClass: true,
+      failureClassConfidence: true,
+      failureClassSummary: true,
     },
   });
   if (!run) {

@@ -127,6 +127,12 @@ Returns the run, scoped to the token's project (other projects return `404`):
   "id": "...",
   "status": "queued | running | succeeded | failed | error",
   "conclusion": "success | failure | neutral",
+  "gate": {
+    "verdict": "pass | pass_with_warnings | fail | pending",
+    "reasons": ["Failure classified as flaky and this test is quarantined — not blocking the merge"],
+    "failureClass": "real_bug | flaky | environment | automation | null",
+    "quarantineApplied": false
+  },
   "summary": "…",
   "stages": [{ "name": "execute", "status": "succeeded" }],
   "finalRunId": "…",
@@ -137,7 +143,25 @@ Returns the run, scoped to the token's project (other projects return `404`):
 
 Conclusion mapping: `succeeded → success`, `failed`/`error` → `failure`,
 everything else → `neutral`. Poll until `status` is terminal
-(`succeeded`/`failed`/`error`), then exit `0` on `success`, `1` otherwise.
+(`succeeded`/`failed`/`error`).
+
+### The flakiness-aware merge gate
+
+Prefer `gate.verdict` over the raw `conclusion` when deciding whether to fail
+the CI job. The gate consults the AI failure classification of the final run:
+
+| Situation | `gate.verdict` | Blocks merge? |
+| --- | --- | --- |
+| All stages succeeded | `pass` | No |
+| Failure classified `flaky` **and** the test is quarantined | `pass_with_warnings` | **No** — known-flaky tests don't block your team |
+| Failure classified `flaky`, not quarantined | `fail` | Yes — run flakiness detection, quarantine if confirmed |
+| Failure classified `real_bug` | `fail` | Yes — the test caught a product defect |
+| Failure classified `environment` | `fail` | Yes — retry recommended |
+| Failure classified `automation` | `fail` | Yes — fix or self-heal the script |
+
+The bundled GitHub Action already honors `gate.verdict` (falling back to
+`conclusion` against older servers) and prints the verdict, failure class, and
+reasons in the job summary.
 
 ## 6. Security notes
 

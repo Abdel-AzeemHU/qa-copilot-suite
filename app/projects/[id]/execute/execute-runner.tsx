@@ -26,7 +26,17 @@ interface RunStatus {
   startedAt: string | null;
   completedAt: string | null;
   createdAt: string;
+  failureClass: string | null;
+  failureClassConfidence: string | null;
+  failureClassSummary: string | null;
 }
+
+const FAILURE_CLASS_LABELS: Record<string, { label: string; variant: BadgeProps["variant"]; hint: string }> = {
+  real_bug: { label: "Real bug", variant: "high", hint: "The app misbehaved — this failure is worth a bug report." },
+  flaky: { label: "Flaky", variant: "medium", hint: "Non-deterministic failure — consider re-running or quarantining." },
+  environment: { label: "Environment", variant: "info", hint: "Infrastructure issue — the app and test are likely fine." },
+  automation: { label: "Automation", variant: "secondary", hint: "The test script itself needs fixing — try self-healing." },
+};
 
 const TERMINAL = new Set(["passed", "failed", "error"]);
 
@@ -73,13 +83,25 @@ export function ExecuteRunner({
     }
   }, [run?.logs]);
 
+  const postTerminalPolls = useRef(0);
+
   const poll = async (runId: string) => {
     try {
       const res = await fetch(`/api/runs/${runId}`, { cache: "no-store" });
       if (!res.ok) return;
       const data = (await res.json()) as RunStatus;
       setRun(data);
-      if (TERMINAL.has(data.status)) stopPolling();
+      if (TERMINAL.has(data.status)) {
+        // For failed/error runs, keep polling briefly so the async AI failure
+        // classification can arrive; give up after ~30s.
+        const awaitingClassification =
+          data.status !== "passed" && !data.failureClass;
+        if (!awaitingClassification || postTerminalPolls.current >= 15) {
+          stopPolling();
+        } else {
+          postTerminalPolls.current += 1;
+        }
+      }
     } catch {
       // transient; keep polling
     }
@@ -90,6 +112,7 @@ export function ExecuteRunner({
     setStarting(true);
     stopPolling();
     setRun(null);
+    postTerminalPolls.current = 0;
     try {
       const res = await fetch("/api/runs", {
         method: "POST",
@@ -161,6 +184,37 @@ export function ExecuteRunner({
 
           {run.errorMessage ? (
             <p className="text-sm text-red-600">{run.errorMessage}</p>
+          ) : null}
+
+          {run.status === "failed" || run.status === "error" ? (
+            run.failureClass && FAILURE_CLASS_LABELS[run.failureClass] ? (
+              <div className="rounded-md bg-neutral-50 p-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">AI triage:</span>
+                  <Badge variant={FAILURE_CLASS_LABELS[run.failureClass].variant}>
+                    {FAILURE_CLASS_LABELS[run.failureClass].label}
+                  </Badge>
+                  {run.failureClassConfidence ? (
+                    <span className="text-xs text-neutral-400">
+                      {run.failureClassConfidence} confidence
+                    </span>
+                  ) : null}
+                </div>
+                <p className="mt-1 text-xs text-neutral-500">
+                  {FAILURE_CLASS_LABELS[run.failureClass].hint}
+                </p>
+                {run.failureClassSummary ? (
+                  <p className="mt-2 text-sm text-neutral-600">
+                    {run.failureClassSummary}
+                  </p>
+                ) : null}
+              </div>
+            ) : (
+              <p className="text-xs text-neutral-400">
+                AI is triaging this failure (real bug vs flaky vs environment vs
+                automation)…
+              </p>
+            )
           ) : null}
 
           {run.status === "failed" || run.status === "error" ? (

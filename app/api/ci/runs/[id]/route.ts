@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db/prisma";
 import { verifyToken } from "@/lib/ci/tokens";
+import { evaluateGate } from "@/lib/ci/gate";
 import { NextRequest, NextResponse } from "next/server";
 
 // Token-authed run-status endpoint. The CI job polls this to wait for
@@ -43,10 +44,20 @@ export async function GET(
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "";
 
+  // Flakiness-aware merge gate: unlike the raw conclusion, the gate does not
+  // block on quarantined known-flaky tests and explains every block.
+  const gate = await evaluateGate(run.id);
+
   return NextResponse.json({
     id: run.id,
     status: run.status,
     conclusion: conclusionFor(run.status),
+    gate: {
+      verdict: gate.verdict,
+      reasons: gate.reasons,
+      failureClass: gate.failureClass,
+      quarantineApplied: gate.quarantineApplied,
+    },
     summary: run.summary,
     stages: run.stages.map((s) => ({ name: s.name, status: s.status })),
     finalRunId: run.finalRunId,

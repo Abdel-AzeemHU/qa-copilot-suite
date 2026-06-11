@@ -67,6 +67,9 @@ conclusion="neutral"
 summary=""
 stages_md=""
 run_url=""
+gate_verdict=""
+gate_reasons=""
+gate_class=""
 
 while true; do
   if [ "$(date +%s)" -ge "${deadline}" ]; then
@@ -87,6 +90,9 @@ while true; do
   summary=$(echo "${poll_resp}" | jq -r '.summary // ""')
   run_url=$(echo "${poll_resp}" | jq -r '.url // ""')
   stages_md=$(echo "${poll_resp}" | jq -r '.stages[]? | "- " + .name + ": " + .status')
+  gate_verdict=$(echo "${poll_resp}" | jq -r '.gate.verdict // ""')
+  gate_reasons=$(echo "${poll_resp}" | jq -r '.gate.reasons[]? | "- " + .')
+  gate_class=$(echo "${poll_resp}" | jq -r '.gate.failureClass // ""')
 
   echo "Status: ${status}"
 
@@ -101,6 +107,8 @@ done
 # --- Report ----------------------------------------------------------------
 echo "----------------------------------------"
 echo "Pipeline ${pipeline_id} finished: ${status} (${conclusion})"
+[ -n "${gate_verdict}" ] && echo "Merge gate: ${gate_verdict}${gate_class:+ (failure class: ${gate_class})}"
+[ -n "${gate_reasons}" ] && echo "${gate_reasons}"
 [ -n "${summary}" ] && echo "${summary}"
 echo "Stages:"
 echo "${stages_md}"
@@ -111,6 +119,11 @@ echo "----------------------------------------"
   echo "## QA Copilot Suite"
   echo ""
   echo "**Status:** ${status} (${conclusion})"
+  if [ -n "${gate_verdict}" ]; then
+    echo ""
+    echo "**Merge gate:** ${gate_verdict}${gate_class:+ — failure classified as \`${gate_class}\`}"
+    [ -n "${gate_reasons}" ] && echo "" && echo "${gate_reasons}"
+  fi
   [ -n "${summary}" ] && echo "" && echo "${summary}"
   echo ""
   echo "### Stages"
@@ -118,9 +131,26 @@ echo "----------------------------------------"
   [ -n "${run_url}" ] && echo "" && echo "[View run](${run_url})"
 } >>"${GITHUB_STEP_SUMMARY:-/dev/null}"
 
-if [ "${conclusion}" = "failure" ] && [ "${QACS_FAIL}" = "true" ]; then
-  echo "::error::QA Copilot Suite pipeline failed."
-  exit 1
+# --- Gate decision -----------------------------------------------------------
+# The flakiness-aware gate verdict takes precedence over the raw conclusion:
+# a quarantined known-flaky failure yields "pass_with_warnings" and does NOT
+# block the merge. Fall back to the raw conclusion for older servers.
+if [ "${QACS_FAIL}" = "true" ]; then
+  if [ -n "${gate_verdict}" ]; then
+    case "${gate_verdict}" in
+      pass | pass_with_warnings)
+        [ "${gate_verdict}" = "pass_with_warnings" ] && \
+          echo "::warning::Known-flaky test failed but is quarantined — not blocking the merge."
+        ;;
+      *)
+        echo "::error::QA Copilot Suite merge gate blocked this change."
+        exit 1
+        ;;
+    esac
+  elif [ "${conclusion}" = "failure" ]; then
+    echo "::error::QA Copilot Suite pipeline failed."
+    exit 1
+  fi
 fi
 
 exit 0

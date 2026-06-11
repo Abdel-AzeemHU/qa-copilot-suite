@@ -194,6 +194,11 @@ model ExecutionRun {
   batchId        String?
   batch          ParallelBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
   createdAt      DateTime  @default(now())
+
+  // Failure classification (set asynchronously after a failed/error run)
+  failureClass           String? // real_bug | flaky | environment | automation
+  failureClassConfidence String? // low | medium | high
+  failureClassSummary    String? // one-paragraph AI explanation
   testCases      TestCase[] // which test cases this run covers
 
   healingAttempts HealingAttempt[] @relation("OriginalRun")
