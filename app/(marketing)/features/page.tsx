@@ -3,10 +3,10 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Features — QA Copilot Suite",
-  description: "12 capabilities across a closed-loop QA pipeline — from requirement to verified test.",
+  description: "The whole QA loop: requirement → test case → owned code → run → heal & classify → gate → report. Code you own, your own LLM key.",
   openGraph: {
     title: "Features — QA Copilot Suite",
-    description: "12 capabilities across a closed-loop QA pipeline — from requirement to verified test.",
+    description: "The whole QA loop: requirement → test case → owned code → run → heal & classify → gate → report. Code you own, your own LLM key.",
     type: "website",
   },
 };
@@ -61,7 +61,19 @@ const GROUPS = [
       {
         icon: "m18 16 4-4-4-4M6 8l-4 4 4 4M14.5 4l-5 16",
         name: "Automation Code Generator",
-        desc: "Generate runnable Playwright TypeScript from test cases, complete with page object patterns, fixtures, and assertions.",
+        desc: "Generate portable Playwright or Selenium (TypeScript) and REST Assured (Java) code you fully own — standard frameworks, zero lock-in, exportable any time.",
+        badge: "AI",
+      },
+      {
+        icon: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z",
+        name: "In-Tool Test Recorder",
+        desc: "Record flows directly in the app — no browser extension to install. Recordings become editable test cases and automation code.",
+        badge: "Setup",
+      },
+      {
+        icon: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+        name: "API Test Designer",
+        desc: "Import an OpenAPI/Swagger spec or Postman collection and the AI generates functional, negative, edge-case, and security tests per endpoint.",
         badge: "AI",
       },
     ],
@@ -77,13 +89,19 @@ const GROUPS = [
       {
         icon: "M8 5v14l11-7z",
         name: "Live Executor",
-        desc: "Run generated suites live against your app URL and watch pass/fail results stream back in real time — no CI setup required.",
+        desc: "Run suites live against your app with logs streaming in real time, and fan out across parallel runs — no CI setup required.",
         badge: "Execution",
       },
       {
         icon: "M21 12a9 9 0 1 1-3-6.7M21 3v6h-6",
-        name: "Self-Healing Engine",
-        desc: "When selectors break after a UI update, the AI diagnoses the DOM diff and rewrites locators automatically — suites stay green.",
+        name: "Two-Layer Self-Healing",
+        desc: "Layer one heals broken selectors mid-test so the run keeps going; layer two repairs the whole script after the run. Suites stay green without manual triage.",
+        badge: "Execution",
+      },
+      {
+        icon: "M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
+        name: "Visual Regression Testing",
+        desc: "Pixel-level snapshot comparisons with AI triage that separates real visual bugs from rendering noise and intentional design changes.",
         badge: "Execution",
       },
       {
@@ -91,6 +109,34 @@ const GROUPS = [
         name: "Bug Reporter",
         desc: "Convert failing runs into structured bug reports with severity, reproduction steps, screenshots, and labels — filed automatically.",
         badge: "Execution",
+      },
+    ],
+  },
+  {
+    id: "failure-intelligence",
+    label: "Failure Intelligence",
+    color: "from-rose-500 to-pink-600",
+    textColor: "text-rose-400",
+    borderColor: "border-rose-500/30",
+    bgColor: "bg-rose-500/10",
+    features: [
+      {
+        icon: "M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83zM7 7h.01",
+        name: "AI Failure Classification",
+        desc: "Every failed run is auto-labeled: real bug, flaky test, environment issue, or automation error — so you only chase failures that matter.",
+        badge: "New",
+      },
+      {
+        icon: "M3 3v18h18M7 14l4-4 3 3 5-6",
+        name: "Flakiness Detection",
+        desc: "Run a test N times to compute a flakiness score, quarantine unstable tests, and get AI root-cause analysis on why they flake.",
+        badge: "Intelligence",
+      },
+      {
+        icon: "M6 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM6 9v6m0 6a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm12-9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 0a9 9 0 0 1-9 9",
+        name: "Flakiness-Aware CI Merge Gate",
+        desc: "A GitHub Action that blocks PRs on real bugs — but never on quarantined, known-flaky tests. Ship on signal, not noise.",
+        badge: "New",
       },
     ],
   },
@@ -124,7 +170,7 @@ const GROUPS = [
   },
   {
     id: "integrations",
-    label: "Integrations & Automation",
+    label: "Platform & Integrations",
     color: "from-amber-500 to-orange-600",
     textColor: "text-amber-400",
     borderColor: "border-amber-500/30",
@@ -132,14 +178,14 @@ const GROUPS = [
     features: [
       {
         icon: "M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 1 1 0-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 1 0 5.367-2.684 3 3 0 0 0-5.367 2.684zm0 9.316a3 3 0 1 0 5.368 2.684 3 3 0 0 0-5.368-2.684z",
-        name: "Jira & Integrations",
-        desc: "Sync bug reports to Jira, push notifications to Slack, and trigger GitHub webhooks — all from a single run.",
+        name: "Slack, GitHub, Jira & Webhooks",
+        desc: "Sync bug reports to Jira, push notifications to Slack, and trigger GitHub Actions and webhooks — all from a single run.",
         badge: "Integration",
       },
       {
         icon: "M4 4v5h.582m15.356 2A8.001 8.001 0 0 0 4.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 0 1-15.357-2m15.357 2H15",
         name: "Pipeline Orchestration",
-        desc: "Chain the full workflow: generate → execute → heal → report → notify. Run the complete loop with one trigger.",
+        desc: "Chain the full workflow: execute → heal → bug report → visual checks → notify. Run the complete loop with one trigger.",
         badge: "Pipeline",
       },
       {
@@ -147,6 +193,18 @@ const GROUPS = [
         name: "Smart Scheduling",
         desc: "Trigger runs on a cron schedule, on CI events (PR opens, merge), or on-demand — always-on QA without manual intervention.",
         badge: "Pipeline",
+      },
+      {
+        icon: "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75",
+        name: "Teams, Roles & Audit Logs",
+        desc: "Organizations with role-based access and invitations, plus a full audit log of who changed what — built for real QA teams.",
+        badge: "Platform",
+      },
+      {
+        icon: "M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3",
+        name: "Bring Your Own LLM Key",
+        desc: "Use your own Claude or OpenAI key, stored encrypted at rest. Transparent AI cost at provider rates — we never resell tokens.",
+        badge: "Platform",
       },
     ],
   },
@@ -166,8 +224,8 @@ export default function FeaturesPage() {
           </span>
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-slate-300">
-          12 capabilities across 4 stage groups — from the first requirement to
-          always-on, self-healing QA.
+          23 capabilities across 5 stage groups — from the first requirement to
+          always-on, self-healing QA with code you own and your own LLM key.
         </p>
       </div>
 
@@ -214,10 +272,11 @@ export default function FeaturesPage() {
             Why QA Copilot
           </p>
           <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            How we compare to manual QA
+            How we compare
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-slate-300">
-            See what changes when you close the loop with AI.
+            See what changes when you close the loop with AI — and keep
+            ownership of everything it produces.
           </p>
         </div>
         <div className="overflow-x-auto rounded-2xl border border-white/10">
@@ -234,9 +293,12 @@ export default function FeaturesPage() {
               {[
                 { capability: "Test Case Generation", manual: "Hours/days", other: "Templates only", copilot: "Seconds, from requirements" },
                 { capability: "Coverage Analysis", manual: "Manual spreadsheet", other: "Basic metrics", copilot: "Requirement-linked traceability" },
-                { capability: "Automation Code", manual: "Written by hand", other: "Record & playback", copilot: "AI-generated Playwright/Selenium" },
+                { capability: "Automation Code", manual: "Written by hand", other: "Proprietary cloud format", copilot: "Portable Playwright/Selenium TS & REST Assured Java — you own it" },
                 { capability: "Bug Filing", manual: "Manual Jira entry", other: "Not included", copilot: "Automatic, with repro steps" },
-                { capability: "Self-Healing", manual: "Manual locator fix", other: "Not included", copilot: "AI diagnoses & rewrites selectors" },
+                { capability: "Self-Healing", manual: "Manual locator fix", other: "Selector retry only", copilot: "Two layers: mid-test heal + whole-script repair" },
+                { capability: "Failure Triage", manual: "Hours of log digging", other: "Pass/fail only", copilot: "AI labels: real bug / flaky / environment / automation" },
+                { capability: "Flaky Tests in CI", manual: "Block every PR", other: "Block every PR", copilot: "Merge gate skips quarantined known-flaky tests" },
+                { capability: "AI Costs", manual: "N/A", other: "Opaque credits, quote-gated", copilot: "Bring your own LLM key — provider rates, no resale" },
                 { capability: "Scheduling", manual: "Manual trigger", other: "Basic cron", copilot: "CI events, cron, on-demand" },
                 { capability: "Requirement Gaps", manual: "Missed silently", other: "Not detected", copilot: "AI audit before generation" },
               ].map((row, i) => (

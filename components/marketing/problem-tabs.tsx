@@ -15,7 +15,7 @@ const problems = [
     short: "$200K+ per year",
     stat: "$200K+",
     detail:
-      "A dedicated automation engineer plus tooling can run well over $200K annually. With bring-your-own-key AI doing the heavy lifting, small teams get enterprise-grade coverage without the headcount.",
+      "A dedicated automation engineer plus quote-gated enterprise tooling can run well over $200K annually. QA Copilot is self-serve with transparent pricing — and you bring your own LLM key, paying provider rates with no token resale.",
   },
   {
     title: "Inconsistent Coverage",
@@ -29,7 +29,14 @@ const problems = [
     short: "Endless maintenance",
     stat: "Auto-healed",
     detail:
-      "Brittle selectors mean engineers spend more time fixing tests than writing features. Self-Healing detects broken locators on failure and repairs them automatically, keeping suites green.",
+      "Brittle selectors mean engineers spend more time fixing tests than writing features. Two-layer Self-Healing fixes selectors mid-test and repairs whole scripts after the run — keeping suites green automatically.",
+  },
+  {
+    title: "Flaky Tests Block CI",
+    short: "Noise stalls merges",
+    stat: "Signal only",
+    detail:
+      "One flaky test can block every PR. QA Copilot classifies each failure as real bug, flaky, environment, or automation error — and its flakiness-aware merge gate blocks PRs on real bugs only, never on quarantined known-flaky tests.",
   },
 ];
 
@@ -39,7 +46,7 @@ export function ProblemTabs() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {problems.map((pr, i) => (
           <button
             key={pr.title}

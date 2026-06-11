@@ -14,6 +14,10 @@ const ICONS = {
   run: "M8 5v14l11-7z",
   heal: "M21 12a9 9 0 1 1-3-6.7M21 3v6h-6",
   trace: "M3 3v18h18M7 14l4-4 3 3 5-6",
+  classify: "M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83zM7 7h.01",
+  gate: "M6 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM6 9v6m0 6a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm12-9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 0a9 9 0 0 1-9 9",
+  record: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z",
+  api: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
 };
 
 export function ModulesBento() {
@@ -31,7 +35,7 @@ export function ModulesBento() {
           </div>
         </div>
         <p className="text-sm leading-relaxed text-slate-300">
-          Execute generated suites live in Playwright, Selenium, or REST Assured and watch results stream back in real time.
+          Execute generated suites live in Playwright, Selenium, or REST Assured — with parallel runs and logs streaming back in real time.
         </p>
         <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-black/50 p-4 font-mono text-xs">
           <div className="mb-2 flex gap-1.5">
@@ -48,9 +52,9 @@ export function ModulesBento() {
       </div>
 
       {[
-        { k: "gen", name: "Test Case Generator", d: "User stories become prioritized test suites." },
-        { k: "code", name: "Automation Code Generator", d: "Export to Playwright, Selenium & REST Assured." },
-        { k: "plan", name: "Test Planner", d: "Structure coverage across epics and releases." },
+        { k: "gen", name: "Test Case Generator", d: "Plain-English requirements become prioritized test suites with CSV/Gherkin export." },
+        { k: "code", name: "Automation Code Generator", d: "Portable Playwright/Selenium TS & REST Assured Java — code you own, zero lock-in." },
+        { k: "record", name: "In-Tool Test Recorder", d: "Record flows in the app itself — no browser extension required." },
       ].map((m) => (
         <Card key={m.k} k={m.k} name={m.name} d={m.d} />
       ))}
@@ -62,19 +66,23 @@ export function ModulesBento() {
             <Icon d={ICONS.heal} />
           </span>
           <div>
-            <h3 className="font-semibold text-white">Self-Healing</h3>
+            <h3 className="font-semibold text-white">Two-Layer Self-Healing</h3>
             <p className="mt-1 text-sm leading-relaxed text-slate-300">
-              When a selector breaks, QA Copilot diagnoses the failure and rewrites the locator automatically — your suite stays green without manual triage.
+              Layer one heals broken selectors mid-test so the run keeps going; layer two repairs the whole script after the run — your suite stays green without manual triage.
             </p>
           </div>
         </div>
       </div>
 
       {[
+        { k: "classify", name: "AI Failure Classification", d: "Every failure labeled: real bug, flaky, environment, or automation error." },
+        { k: "trace", name: "Flakiness Detection", d: "Run N times, score flakiness, quarantine, and get AI root-cause analysis." },
+        { k: "gate", name: "Flakiness-Aware CI Gate", d: "GitHub Action blocks PRs on real bugs — never on known-flaky tests." },
+        { k: "review", name: "Visual Regression", d: "Snapshot diffs with AI triage of real bugs vs. rendering noise." },
+        { k: "api", name: "API Testing", d: "Import OpenAPI or Postman; AI generates functional, negative, edge & security tests." },
         { k: "bug", name: "Bug Reporter", d: "Turn failures into structured, reproducible reports." },
-        { k: "review", name: "Static Review", d: "AI peer review of your test plans and code." },
-        { k: "chat", name: "QA Chat Assist", d: "Ask questions about coverage and strategy." },
-        { k: "trace", name: "Traceability Spine", d: "Every test links back to a requirement." },
+        { k: "plan", name: "Pipeline Orchestration", d: "Execute → heal → bug report → visual → notify, on one trigger." },
+        { k: "chat", name: "Teams & Integrations", d: "Orgs, roles, audit logs, schedules — plus Slack, GitHub, Jira & webhooks." },
       ].map((m) => (
         <Card key={m.k} k={m.k} name={m.name} d={m.d} />
       ))}
@@ -95,12 +103,12 @@ function Card({ k, name, d }: { k: string; name: string; d: string }) {
 }
 
 const stats = [
-  { n: "12", l: "Workflow Steps", d: "M4 4h16v16H4z M4 12h16M12 4v16" },
-  { n: "5-Stage", l: "Closed Loop", d: "M21 12a9 9 0 1 1-3-6.7M21 3v6h-6" },
+  { n: "14", l: "Workflow Steps", d: "M4 4h16v16H4z M4 12h16M12 4v16" },
+  { n: "100%", l: "Code You Own", d: "m18 16 4-4-4-4M6 8l-4 4 4 4M14.5 4l-5 16" },
   { n: "3", l: "Frameworks", d: "m18 16 4-4-4-4M6 8l-4 4 4 4M14.5 4l-5 16" },
-  { n: "100%", l: "Traceable", d: "M20 6 9 17l-5-5" },
-  { n: "AI", l: "Self-Healing", d: "M21 12a9 9 0 1 1-3-6.7M21 3v6h-6" },
-  { n: "BYOK", l: "Your Own Key", d: "M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3" },
+  { n: "4", l: "Failure Labels", d: "M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.83zM7 7h.01" },
+  { n: "2-Layer", l: "Self-Healing", d: "M21 12a9 9 0 1 1-3-6.7M21 3v6h-6" },
+  { n: "BYOK", l: "Your Own LLM Key", d: "M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3" },
 ];
 
 export function StatsBar() {

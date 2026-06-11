@@ -1,9 +1,10 @@
 const steps = [
   { label: "Requirement", icon: "M9 12h6m-6 4h6M9 8h6M5 3h14a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" },
   { label: "Test Cases", icon: "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" },
-  { label: "Automation Code", icon: "m18 16 4-4-4-4M6 8l-4 4 4 4M14.5 4l-5 16" },
+  { label: "Code You Own", icon: "m18 16 4-4-4-4M6 8l-4 4 4 4M14.5 4l-5 16" },
   { label: "Live Run", icon: "M8 5v14l11-7z" },
-  { label: "Self-Heal", icon: "M21 12a9 9 0 1 1-3-6.7M21 3v6h-6" },
+  { label: "Heal & Classify", icon: "M21 12a9 9 0 1 1-3-6.7M21 3v6h-6" },
+  { label: "Merge Gate", icon: "M6 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM6 9v6m0 6a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm12-9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 0a9 9 0 0 1-9 9" },
   { label: "Verified", icon: "M20 6 9 17l-5-5" },
 ];
 

@@ -10,11 +10,11 @@ import { SocialProof } from "@/components/marketing/social-proof";
 export const metadata: Metadata = {
   title: "QA Copilot Suite — Closed-loop QA automation",
   description:
-    "Generate test cases, write automation code, run it live, heal what breaks, and trace everything back to the requirement.",
+    "Generate test cases, get automation code you own, run it live, heal what breaks, and classify why tests fail — with your own LLM key and a CI gate that ignores known-flaky tests.",
   openGraph: {
     title: "QA Copilot Suite — Closed-loop QA automation",
     description:
-      "Generate test cases, write automation code, run it live, heal what breaks, and trace everything back to the requirement.",
+      "Generate test cases, get automation code you own, run it live, heal what breaks, and classify why tests fail — with your own LLM key and a CI gate that ignores known-flaky tests.",
     type: "website",
   },
 };
@@ -52,9 +52,10 @@ export default function Home() {
               — autonomously.
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-300">
-              The only QA suite that generates test cases, writes automation
-              code, runs it live, heals what breaks, and traces everything back
-              to the requirement.
+              The whole loop: requirement → test case → portable automation
+              code <em className="not-italic text-white">you own</em> → live
+              run → heal & classify every failure → a CI gate that blocks real
+              bugs, not known-flaky tests. Powered by your own LLM key.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -72,11 +73,10 @@ export default function Home() {
             </div>
             <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400">
               {[
-                "Works with Playwright",
-                "Claude & OpenAI",
-                "Jira",
-                "Slack",
-                "GitHub",
+                "Playwright & Selenium TS",
+                "REST Assured Java",
+                "Bring your own Claude or OpenAI key",
+                "Jira · Slack · GitHub",
               ].map((item, i, arr) => (
                 <span key={item} className="flex items-center gap-2">
                   <span className="text-slate-300">{item}</span>
@@ -89,7 +89,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* WORKFLOW DEMO — 12-step interactive */}
+      {/* WORKFLOW DEMO — 14-step interactive */}
       <section id="workflow-demo" className="scroll-mt-20 border-y border-white/10 bg-white/[0.015] py-20">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="mb-12 text-center">
@@ -98,9 +98,9 @@ export default function Home() {
               See every step of the workflow
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-slate-300">
-              Walk through all 12 stages — from connecting your repo to
-              fully-automated, always-on QA — with live activity and real
-              metrics at each step.
+              Walk through all 14 stages — from connecting your repo to a
+              flakiness-aware merge gate and always-on QA — with live activity
+              and real metrics at each step.
             </p>
           </div>
           <WorkflowDemo />
@@ -126,8 +126,9 @@ export default function Home() {
             </span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-slate-300">
-            Every requirement flows through the full lifecycle — and back again —
-            so nothing slips through untested.
+            Every requirement flows through the full lifecycle — owned code,
+            live runs, healing, failure classification, and a merge gate — and
+            back again, so nothing slips through untested.
           </p>
           <div className="mt-14">
             <ClosedLoop />
@@ -141,7 +142,7 @@ export default function Home() {
           <div className="mb-12 text-center">
             <Eyebrow>The suite</Eyebrow>
             <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Twelve capabilities, one closed loop
+              One suite, one closed loop
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-slate-300">
               Each module hands off to the next — from the first requirement to
@@ -203,7 +204,7 @@ export default function Home() {
                 </Link>
               </div>
               <p className="mt-4 text-xs text-slate-400">
-                No credit card. Bring your own Claude key.
+                No credit card. No sales call. Bring your own Claude or OpenAI key — stored encrypted, billed at provider rates.
               </p>
             </div>
           </div>
