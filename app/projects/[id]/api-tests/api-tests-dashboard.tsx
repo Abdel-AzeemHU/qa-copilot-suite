@@ -12,6 +12,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ApiTestRunnerPanel } from "./api-test-runner";
 
 // --- Types ---
 
@@ -75,7 +76,7 @@ function priorityVariant(priority: string): BadgeProps["variant"] {
 export function ApiTestsDashboard({ projectId }: { projectId: string }) {
   const [specs, setSpecs] = useState<ApiSpecSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<"specs" | "import">("specs");
+  const [tab, setTab] = useState<"specs" | "import" | "run">("specs");
 
   // Import form state
   const [name, setName] = useState("");
@@ -210,7 +211,7 @@ export function ApiTestsDashboard({ projectId }: { projectId: string }) {
     <div className="space-y-6">
       {/* Tabs */}
       <div className="flex gap-2 border-b border-neutral-200">
-        {(["specs", "import"] as const).map((t) => (
+        {(["specs", "import", "run"] as const).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -220,12 +221,18 @@ export function ApiTestsDashboard({ projectId }: { projectId: string }) {
                 : "text-neutral-500 hover:text-neutral-700"
             }`}
           >
-            {t === "specs" ? "Imported specs" : "Import spec"}
+            {t === "specs"
+              ? "Imported specs"
+              : t === "import"
+                ? "Import spec"
+                : "Run tests"}
           </button>
         ))}
       </div>
 
-      {tab === "import" ? (
+      {tab === "run" ? (
+        <ApiTestRunnerPanel projectId={projectId} />
+      ) : tab === "import" ? (
         <Card>
           <CardHeader>
             <CardTitle>Import API spec</CardTitle>

@@ -102,6 +102,7 @@ model Project {
   apiTokens        ProjectApiToken[]
   flakinessReports FlakinessReport[]
   apiSpecs         ApiSpec[]
+  apiTestRuns      ApiTestRun[]
 
   @@index([orgId])
 }
@@ -308,13 +309,39 @@ model TestCase {
 
   executionRunId String?
   apiEndpointId  String?
+  compiledRequest String? // JSON-encoded executable HTTP spec (cached from AI compile)
 
   project          Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
   executionRun     ExecutionRun?      @relation(fields: [executionRunId], references: [id], onDelete: SetNull)
   apiEndpoint      ApiEndpoint?       @relation(fields: [apiEndpointId], references: [id], onDelete: SetNull)
   flakinessReports FlakinessReport[]
+  apiTestRuns      ApiTestRun[]
 
   @@index([projectId])
+}
+
+model ApiTestRun {
+  id           String    @id @default(cuid())
+  projectId    String
+  testCaseId   String
+  status       String    @default("queued") // queued | running | passed | failed | error
+  method       String?
+  url          String?
+  requestSpec  String? // JSON-encoded compiled request that was executed
+  responseCode Int?
+  responseTimeMs Int?
+  responseBody String? // truncated response body
+  assertions   String    @default("[]") // JSON: [{ description, passed, detail }]
+  errorMessage String?
+  startedAt    DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  project  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  testCase TestCase @relation(fields: [testCaseId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([testCaseId])
 }
 
 model ApiSpec {
