@@ -85,7 +85,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: "What is bring-your-own-key (BYOK)?",
-    a: "You supply your own Claude or OpenAI API key. QA Copilot Suite never pools or resells AI credits — your usage goes directly to your Anthropic or OpenAI account. Keys are encrypted at rest with AES-256-GCM.",
+    a: "You supply your own Claude or OpenAI API key. Qaera never pools or resells AI credits — your usage goes directly to your Anthropic or OpenAI account. Keys are encrypted at rest with AES-256-GCM.",
   },
   {
     q: "Can I switch between AI providers?",
@@ -101,7 +101,7 @@ const FAQ = [
   },
   {
     q: "Do I need to set up my own infrastructure?",
-    a: "No. The Starter and Team plans run tests on QA Copilot's managed infrastructure. Enterprise customers can optionally bring their own runners for tighter security controls.",
+    a: "No. The Starter and Team plans run tests on Qaera's managed infrastructure. Enterprise customers can optionally bring their own runners for tighter security controls.",
   },
 ];
 

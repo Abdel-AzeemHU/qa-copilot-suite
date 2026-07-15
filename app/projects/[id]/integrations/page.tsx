@@ -39,7 +39,7 @@ export default async function IntegrationsPage({
             <CardTitle>Integrations</CardTitle>
             <CardDescription>
               Connect {project.name} to Slack, GitHub, or any webhook endpoint
-              so QA Copilot Suite can push run results and bug reports outward.
+              so Qaera can push run results and bug reports outward.
             </CardDescription>
           </CardHeader>
           <CardContent>

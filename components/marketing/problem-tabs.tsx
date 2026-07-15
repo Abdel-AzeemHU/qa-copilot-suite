@@ -8,14 +8,14 @@ const problems = [
     short: "Weeks → minutes",
     stat: "10x faster",
     detail:
-      "Manually authoring test cases and automation scripts can take weeks per release. QA Copilot turns a user story into a prioritized, runnable suite in seconds — so coverage keeps pace with your sprints.",
+      "Manually authoring test cases and automation scripts can take weeks per release. Qaera turns a user story into a prioritized, runnable suite in seconds — so coverage keeps pace with your sprints.",
   },
   {
     title: "High QA Costs",
     short: "$200K+ per year",
     stat: "$200K+",
     detail:
-      "A dedicated automation engineer plus quote-gated enterprise tooling can run well over $200K annually. QA Copilot is self-serve with transparent pricing — and you bring your own LLM key, paying provider rates with no token resale.",
+      "A dedicated automation engineer plus quote-gated enterprise tooling can run well over $200K annually. Qaera is self-serve with transparent pricing — and you bring your own LLM key, paying provider rates with no token resale.",
   },
   {
     title: "Inconsistent Coverage",
@@ -36,7 +36,7 @@ const problems = [
     short: "Noise stalls merges",
     stat: "Signal only",
     detail:
-      "One flaky test can block every PR. QA Copilot classifies each failure as real bug, flaky, environment, or automation error — and its flakiness-aware merge gate blocks PRs on real bugs only, never on quarantined known-flaky tests.",
+      "One flaky test can block every PR. Qaera classifies each failure as real bug, flaky, environment, or automation error — and its flakiness-aware merge gate blocks PRs on real bugs only, never on quarantined known-flaky tests.",
   },
 ];
 

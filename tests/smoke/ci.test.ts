@@ -60,13 +60,24 @@ function runsReq(token: string | null) {
 // --- generateToken / hashToken -------------------------------------------
 
 describe("generateToken", () => {
-  it("produces a qacs_ raw token, 8-char prefix, and sha256 hash", () => {
+  it("produces a qaera_ raw token, 9-char prefix, and sha256 hash", () => {
     const { raw, prefix, hash } = generateToken();
-    expect(raw).toMatch(/^qacs_[0-9a-f]{32}$/);
-    expect(prefix).toBe(raw.slice(0, 8));
-    expect(prefix).toHaveLength(8);
+    expect(raw).toMatch(/^qaera_[0-9a-f]{32}$/);
+    expect(prefix).toBe(raw.slice(0, 9));
+    expect(prefix).toHaveLength(9);
     expect(hash).toBe(createHash("sha256").update(raw).digest("hex"));
     expect(hash).not.toBe(raw);
+  });
+
+  it("still verifies legacy qacs_ tokens", async () => {
+    // verifyToken must accept the pre-rebrand prefix so existing CI secrets
+    // keep working. (Prefix gate only — DB lookup is mocked elsewhere.)
+    const legacy = "qacs_" + "d".repeat(32);
+    db.projectApiToken.findUnique.mockResolvedValue(null);
+    // Reaching the DB lookup (returning null) proves the prefix was accepted.
+    const result = await verifyToken(legacy);
+    expect(result).toBeNull();
+    expect(db.projectApiToken.findUnique).toHaveBeenCalled();
   });
 
   it("hashToken matches generateToken's hash", () => {
@@ -78,7 +89,7 @@ describe("generateToken", () => {
 // --- verifyToken ----------------------------------------------------------
 
 describe("verifyToken", () => {
-  const raw = "qacs_" + "a".repeat(32);
+  const raw = "qaera_" + "a".repeat(32);
   const hash = hashToken(raw);
 
   it("returns the row and bumps lastUsedAt for a valid token", async () => {
@@ -132,7 +143,7 @@ describe("verifyToken", () => {
 // --- CI trigger route -----------------------------------------------------
 
 describe("POST /api/ci/trigger", () => {
-  const raw = "qacs_" + "b".repeat(32);
+  const raw = "qaera_" + "b".repeat(32);
 
   it("returns 401 when bearer token is missing", async () => {
     const res = await triggerPost(triggerReq(null, { targetUrl: "https://x.com" }));
@@ -201,7 +212,7 @@ describe("POST /api/ci/trigger", () => {
 // --- CI results route -----------------------------------------------------
 
 describe("GET /api/ci/runs/[id]", () => {
-  const raw = "qacs_" + "c".repeat(32);
+  const raw = "qaera_" + "c".repeat(32);
   const params = Promise.resolve({ id: "pr1" });
 
   function mockToken(projectId: string) {

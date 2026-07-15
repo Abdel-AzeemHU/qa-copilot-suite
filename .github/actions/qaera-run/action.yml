@@ -1,5 +1,5 @@
-name: "QA Copilot Suite Run"
-description: "Trigger a QA Copilot Suite pipeline and wait for the result"
+name: "Qaera Run"
+description: "Trigger a Qaera pipeline and wait for the result"
 inputs:
   api-token:
     description: "Project API token (store as a secret)"
@@ -8,9 +8,9 @@ inputs:
     description: "URL to test"
     required: true
   api-base-url:
-    description: "QA Copilot Suite base URL"
+    description: "Qaera base URL"
     required: false
-    default: "https://app.qacopilot.dev"
+    default: "https://app.qaera.ai"
   visual:
     description: "Run visual regression"
     required: false
@@ -29,12 +29,12 @@ runs:
     - shell: bash
       run: ${{ github.action_path }}/run.sh
       env:
-        QACS_TOKEN: ${{ inputs.api-token }}
-        QACS_TARGET_URL: ${{ inputs.target-url }}
-        QACS_BASE_URL: ${{ inputs.api-base-url }}
-        QACS_VISUAL: ${{ inputs.visual }}
-        QACS_FAIL: ${{ inputs.fail-on-regression }}
-        QACS_TIMEOUT: ${{ inputs.timeout-seconds }}
-        QACS_REF: ${{ github.ref }}
-        QACS_COMMIT: ${{ github.sha }}
-        QACS_PR_NUMBER: ${{ github.event.pull_request.number }}
+        QAERA_TOKEN: ${{ inputs.api-token }}
+        QAERA_TARGET_URL: ${{ inputs.target-url }}
+        QAERA_BASE_URL: ${{ inputs.api-base-url }}
+        QAERA_VISUAL: ${{ inputs.visual }}
+        QAERA_FAIL: ${{ inputs.fail-on-regression }}
+        QAERA_TIMEOUT: ${{ inputs.timeout-seconds }}
+        QAERA_REF: ${{ github.ref }}
+        QAERA_COMMIT: ${{ github.sha }}
+        QAERA_PR_NUMBER: ${{ github.event.pull_request.number }}

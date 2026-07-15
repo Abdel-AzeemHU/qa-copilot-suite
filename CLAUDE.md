@@ -1,6 +1,6 @@
 @AGENTS.md
 
-# QA Copilot Suite
+# Qaera (formerly QA Copilot Suite)
 
 AI-assisted QA platform. Phase 1: email/password auth, projects, and an
 LLM-powered Test Case Generator with CSV/Gherkin export.

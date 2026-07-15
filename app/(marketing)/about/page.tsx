@@ -2,10 +2,10 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About — QA Copilot Suite",
+  title: "About — Qaera",
   description: "Our mission: close the loop between requirements and verified tests, automatically.",
   openGraph: {
-    title: "About — QA Copilot Suite",
+    title: "About — Qaera",
     description: "Our mission: close the loop between requirements and verified tests, automatically.",
     type: "website",
   },
@@ -69,7 +69,7 @@ export default function AboutPage() {
           </span>
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-300">
-          QA Copilot Suite was built on a simple conviction: testing should not
+          Qaera was built on a simple conviction: testing should not
           be the bottleneck between an idea and a release. By chaining AI
           generation, live execution, and self-healing into a single closed
           loop, we turn requirements into verified coverage — automatically.
@@ -90,7 +90,7 @@ export default function AboutPage() {
           </p>
           <p className="leading-relaxed">
             <span className="font-semibold text-white">The solution.</span>{" "}
-            QA Copilot Suite connects every stage of the QA lifecycle into one pipeline. You paste
+            Qaera connects every stage of the QA lifecycle into one pipeline. You paste
             in a requirement, and the AI reviews it for gaps, generates a prioritized set of test
             cases, writes runnable Playwright automation code, and immediately runs it against your
             app. Failures trigger the self-healing engine, which diagnoses DOM changes and rewrites
@@ -128,7 +128,7 @@ export default function AboutPage() {
         </div>
         <h2 className="text-2xl font-bold text-white">Built by people who lived the problem</h2>
         <p className="mt-3 text-slate-400">
-          Illustrative team — QA Copilot Suite is in open beta.
+          Illustrative team — Qaera is in open beta.
         </p>
         <div className="mt-8 grid gap-5 sm:grid-cols-3">
           {team.map((member) => (
@@ -152,7 +152,7 @@ export default function AboutPage() {
           Help us shape the loop
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-slate-300">
-          QA Copilot is in open beta. Try it free, send us feedback, and help
+          Qaera is in open beta. Try it free, send us feedback, and help
           define what closed-loop QA looks like.
         </p>
         <Link

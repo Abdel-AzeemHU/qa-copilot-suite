@@ -1,9 +1,9 @@
 # EXAMPLE — copy this into your own repo and remove the `if: false` guard.
 #
 # This workflow is intentionally gated with `if: false` so it does NOT run in
-# the QA Copilot Suite repo itself. In your repo, delete the `if: false` line
-# (and this comment) to run QA Copilot Suite on every pull request.
-name: QA Copilot on PR
+# the Qaera repo itself. In your repo, delete the `if: false` line
+# (and this comment) to run Qaera on every pull request.
+name: Qaera on PR
 on: pull_request
 jobs:
   qa:
@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/qa-copilot-run
+      - uses: ./.github/actions/qaera-run
         with:
-          # Store the project API token generated in the QA Copilot Suite UI
-          # as a GitHub secret named QACS_TOKEN.
-          api-token: ${{ secrets.QACS_TOKEN }}
+          # Store the project API token generated in the Qaera UI
+          # as a GitHub secret named QAERA_TOKEN.
+          api-token: ${{ secrets.QAERA_TOKEN }}
           target-url: https://staging.example.com
           visual: "true"

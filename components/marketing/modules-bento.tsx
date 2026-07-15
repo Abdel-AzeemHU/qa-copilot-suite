@@ -43,7 +43,7 @@ export function ModulesBento() {
             <span className="h-2.5 w-2.5 rounded-full bg-amber-400/70" />
             <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/70" />
           </div>
-          <p className="text-slate-400">$ qa-copilot run --suite checkout</p>
+          <p className="text-slate-400">$ qaera run --suite checkout</p>
           <p className="text-emerald-300">✓ add to cart updates subtotal (412ms)</p>
           <p className="text-emerald-300">✓ valid promo applies discount (388ms)</p>
           <p className="text-emerald-300">✓ invalid promo shows error (201ms)</p>

@@ -72,7 +72,7 @@ export function bugReportTitleAndBody(bugReport: BugReportSummary): {
     "**Actual behavior**",
     out.actualBehavior ?? "_Not provided_",
     "",
-    `_Filed automatically by QA Copilot Suite (bug report ${bugReport.id})._`,
+    `_Filed automatically by Qaera (bug report ${bugReport.id})._`,
   ];
   return { title, body: bodyLines.filter((l) => l !== undefined).join("\n") };
 }

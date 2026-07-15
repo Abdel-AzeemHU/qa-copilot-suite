@@ -2,10 +2,10 @@ import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Features — QA Copilot Suite",
+  title: "Features — Qaera",
   description: "The whole QA loop: requirement → test case → owned code → run → heal & classify → gate → report. Code you own, your own LLM key.",
   openGraph: {
-    title: "Features — QA Copilot Suite",
+    title: "Features — Qaera",
     description: "The whole QA loop: requirement → test case → owned code → run → heal & classify → gate → report. Code you own, your own LLM key.",
     type: "website",
   },
@@ -31,7 +31,7 @@ const GROUPS = [
       {
         icon: "M13.828 10.172a4 4 0 0 0-5.656 0l-4 4a4 4 0 1 0 5.656 5.656l1.102-1.101m-.758-4.899a4 4 0 0 0 5.656 0l4-4a4 4 0 0 0-5.656-5.656l-1.1 1.1",
         name: "Project Connection",
-        desc: "Link your repository, describe your application, and set target URLs. QA Copilot scans your codebase context automatically.",
+        desc: "Link your repository, describe your application, and set target URLs. Qaera scans your codebase context automatically.",
         badge: "Setup",
       },
       {
@@ -269,7 +269,7 @@ export default function FeaturesPage() {
       <div className="mt-24">
         <div className="mb-10 text-center">
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-400">
-            Why QA Copilot
+            Why Qaera
           </p>
           <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
             How we compare
@@ -286,7 +286,7 @@ export default function FeaturesPage() {
                 <th className="p-4 text-left text-sm font-medium text-slate-400">Capability</th>
                 <th className="p-4 text-center text-sm font-medium text-slate-400">Manual QA</th>
                 <th className="p-4 text-center text-sm font-medium text-slate-400">Other Tools</th>
-                <th className="p-4 text-center text-sm font-semibold text-indigo-300">QA Copilot Suite</th>
+                <th className="p-4 text-center text-sm font-semibold text-indigo-300">Qaera</th>
               </tr>
             </thead>
             <tbody>

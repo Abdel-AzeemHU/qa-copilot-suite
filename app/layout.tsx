@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "QA Copilot Suite",
+  title: "Qaera",
   description: "AI-assisted QA: generate, manage, and export test cases.",
 };
 

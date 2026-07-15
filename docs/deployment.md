@@ -1,4 +1,4 @@
-# Deployment Guide — QA Copilot Suite
+# Deployment Guide — Qaera
 
 ## 1. Prerequisites
 
@@ -17,7 +17,7 @@
 
 ```bash
 git clone <repo-url>
-cd qa-copilot-suite
+cd qaera
 npm ci
 
 # Copy example env file and fill in values
@@ -103,8 +103,8 @@ All variables are documented in `.env.local.example`. Summary:
 1. Fork or push the repo to GitHub
 2. Go to https://render.com → **New** → **Blueprint**
 3. Connect your GitHub repo — Render reads `render.yaml` and creates:
-   - A **Web Service** (`qa-copilot-suite`)
-   - A **PostgreSQL** database (`qa-copilot-db`)
+   - A **Web Service** (`qaera`)
+   - A **PostgreSQL** database (`qaera-db`)
 4. After creation, set the remaining env vars in the Render dashboard (they are marked `sync: false` in `render.yaml`):
    ```
    NEXTAUTH_URL        = https://<your-render-service>.onrender.com
@@ -167,7 +167,7 @@ If you don't want to use a cloud Postgres for local dev:
 
 ```bash
 docker run -d \
-  --name qa-copilot-db \
+  --name qaera-db \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=postgres \
   -e POSTGRES_DB=qa_copilot \

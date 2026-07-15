@@ -74,7 +74,7 @@ export function MarketingFooter() {
       </div>
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-3 px-5 py-6 text-sm text-slate-500 sm:flex-row sm:items-center sm:px-8">
-          <span>© 2026 QA Copilot Suite. All rights reserved.</span>
+          <span>© 2026 Qaera. All rights reserved.</span>
           <span className="text-xs text-slate-600">
             Illustrative product — in open beta.
           </span>

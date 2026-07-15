@@ -1,6 +1,6 @@
 # CI / CD Integration
 
-Run the QA Copilot Suite pipeline (generate → execute → heal → visual → report)
+Run the Qaera pipeline (generate → execute → heal → visual → report)
 automatically from your CI on every pull request, and block the PR if it fails.
 
 ## 1. Generate a project API token
@@ -8,7 +8,7 @@ automatically from your CI on every pull request, and block the PR if it fails.
 1. Open your project → **CI / CD**.
 2. Under **CI tokens**, enter a name (e.g. `GitHub Actions CI`) and an optional
    expiry, then **Generate token**.
-3. The raw token (`qacs_…`) is shown **once**. Copy it immediately — it is never
+3. The raw token (`qaera_…`) is shown **once**. Copy it immediately — it is never
    shown again. Only a sha256 hash and an 8-char prefix are stored.
 
 Tokens are **scoped to a single project**. The trigger/results endpoints derive
@@ -18,23 +18,23 @@ Admin or owner role is required to create or revoke tokens.
 
 ## 2. GitHub Actions (composite action)
 
-Add the token as a repository secret named `QACS_TOKEN`
+Add the token as a repository secret named `QAERA_TOKEN`
 (Settings → Secrets and variables → Actions).
 
-This repo ships a composite action at `.github/actions/qa-copilot-run`. Use it:
+This repo ships a composite action at `.github/actions/qaera-run`. Use it:
 
 ```yaml
-name: QA Copilot on PR
+name: Qaera on PR
 on: pull_request
 jobs:
   qa:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/qa-copilot-run
+      - uses: ./.github/actions/qaera-run
         with:
-          api-token: ${{ secrets.QACS_TOKEN }}
-          api-base-url: https://app.qacopilot.dev
+          api-token: ${{ secrets.QAERA_TOKEN }}
+          api-base-url: https://app.qaera.ai
           target-url: https://staging.example.com
           visual: "true"
           fail-on-regression: "true"
@@ -42,7 +42,7 @@ jobs:
 ```
 
 Once published to the Marketplace, you can instead reference
-`uses: your-org/qa-copilot-action@v1`.
+`uses: your-org/qaera-action@v1`.
 
 ### Action inputs
 
@@ -50,7 +50,7 @@ Once published to the Marketplace, you can instead reference
 | -------------------- | -------- | ---------------------------- | ---------------------------------------- |
 | `api-token`          | yes      | —                            | Project API token (use a secret).        |
 | `target-url`         | yes      | —                            | URL under test.                          |
-| `api-base-url`       | no       | `https://app.qacopilot.dev`  | QA Copilot Suite base URL.               |
+| `api-base-url`       | no       | `https://app.qaera.ai`  | Qaera base URL.               |
 | `visual`             | no       | `true`                       | Run visual regression.                   |
 | `fail-on-regression` | no       | `true`                       | Fail the job when the pipeline fails.    |
 | `timeout-seconds`    | no       | `600`                        | Max time to wait for completion.         |
@@ -63,19 +63,19 @@ is captured automatically from the GitHub event for traceability.
 ## 3. GitLab CI
 
 ```yaml
-qa-copilot:
+qaera:
   image: alpine:latest
   before_script:
     - apk add --no-cache curl jq
   script:
     - |
-      RUN=$(curl -sS -X POST "$QACS_BASE_URL/api/ci/trigger" \
-        -H "Authorization: Bearer $QACS_TOKEN" \
+      RUN=$(curl -sS -X POST "$QAERA_BASE_URL/api/ci/trigger" \
+        -H "Authorization: Bearer $QAERA_TOKEN" \
         -H "Content-Type: application/json" \
         -d "{\"targetUrl\":\"https://staging.example.com\",\"visual\":true,\"ref\":\"$CI_COMMIT_REF_NAME\",\"commit\":\"$CI_COMMIT_SHA\"}")
       ID=$(echo "$RUN" | jq -r '.pipelineRunId')
       while true; do
-        RESP=$(curl -sS "$QACS_BASE_URL/api/ci/runs/$ID" -H "Authorization: Bearer $QACS_TOKEN")
+        RESP=$(curl -sS "$QAERA_BASE_URL/api/ci/runs/$ID" -H "Authorization: Bearer $QAERA_TOKEN")
         STATUS=$(echo "$RESP" | jq -r '.status')
         case "$STATUS" in succeeded|failed|error) break;; esac
         sleep 5
@@ -86,8 +86,8 @@ qa-copilot:
 ## 4. Generic curl (any CI)
 
 ```bash
-curl -X POST "$QACS_BASE_URL/api/ci/trigger" \
-  -H "Authorization: Bearer $QACS_TOKEN" \
+curl -X POST "$QAERA_BASE_URL/api/ci/trigger" \
+  -H "Authorization: Bearer $QAERA_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"targetUrl":"https://staging.example.com","visual":true}'
 ```
@@ -137,7 +137,7 @@ Returns the run, scoped to the token's project (other projects return `404`):
   "stages": [{ "name": "execute", "status": "succeeded" }],
   "finalRunId": "…",
   "bugReportId": null,
-  "url": "https://app.qacopilot.dev/projects/<id>/pipeline"
+  "url": "https://app.qaera.ai/projects/<id>/pipeline"
 }
 ```
 
@@ -169,7 +169,7 @@ reasons in the job summary.
   derived from the token, never from a URL parameter.
 - **Storage** — only a sha256 hash and an 8-char prefix are persisted. The raw
   token is shown once at creation.
-- **Rotation** — generate a new token, update the `QACS_TOKEN` secret, then
+- **Rotation** — generate a new token, update the `QAERA_TOKEN` secret, then
   revoke the old one.
 - **Revocation** — revoking sets `revokedAt`; the token is rejected immediately.
 - **Expiry** — set an optional expiry at creation; expired tokens are rejected.

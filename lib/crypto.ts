@@ -11,6 +11,8 @@ import {
 
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 12;
+// Historical salt — MUST stay "qa-copilot-suite" even after the Qaera rebrand,
+// or every already-encrypted API key becomes undecryptable.
 const SALT = "qa-copilot-suite:apikey:v1";
 
 function getKey(): Buffer {

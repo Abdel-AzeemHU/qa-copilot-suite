@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: qa-copilot-suite
+    name: qaera
     env: node
     region: oregon
     plan: starter
@@ -10,11 +10,11 @@ services:
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: qa-copilot-db
+          name: qaera-db
           property: connectionString
       - key: DIRECT_URL
         fromDatabase:
-          name: qa-copilot-db
+          name: qaera-db
           property: connectionString
       - key: AUTH_SECRET
         generateValue: true
@@ -26,6 +26,6 @@ services:
         sync: false
 
 databases:
-  - name: qa-copilot-db
-    databaseName: qa_copilot
+  - name: qaera-db
+    databaseName: qaera
     plan: starter

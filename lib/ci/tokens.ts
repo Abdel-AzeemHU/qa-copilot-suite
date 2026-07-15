@@ -4,16 +4,17 @@ import type { ProjectApiToken } from "@prisma/client";
 
 // CI project API tokens. The raw token is shown to the user exactly once;
 // we persist only its sha256 hash (for lookup) plus a short prefix (for
-// identification in the UI). Format: `qacs_<32 hex chars>`.
+// identification in the UI). Format: `qaera_<32 hex chars>`.
+// Legacy `qacs_` tokens (pre-rebrand) remain valid for verification.
 
-const TOKEN_PREFIX_LEN = 8;
+const TOKEN_PREFIX_LEN = 9; // "qaera_" + first 3 hex chars
 
 /**
  * Generates a new project API token.
  * @returns the raw token (show once), its display prefix, and its sha256 hash.
  */
 export function generateToken(): { raw: string; prefix: string; hash: string } {
-  const raw = `qacs_${randomBytes(16).toString("hex")}`; // 32 hex chars
+  const raw = `qaera_${randomBytes(16).toString("hex")}`; // 32 hex chars
   const prefix = raw.slice(0, TOKEN_PREFIX_LEN);
   const hash = hashToken(raw);
   return { raw, prefix, hash };
@@ -31,7 +32,7 @@ export function hashToken(raw: string): string {
 export async function verifyToken(
   raw: string,
 ): Promise<ProjectApiToken | null> {
-  if (!raw || !raw.startsWith("qacs_")) return null;
+  if (!raw || !(raw.startsWith("qaera_") || raw.startsWith("qacs_"))) return null;
   const hash = hashToken(raw);
   const token = await prisma.projectApiToken.findUnique({
     where: { tokenHash: hash },

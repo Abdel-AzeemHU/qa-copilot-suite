@@ -389,7 +389,7 @@ export function IntegrationsManager({
                   type="url"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  placeholder="https://example.com/hooks/qa-copilot"
+                  placeholder="https://example.com/hooks/qaera"
                   required
                 />
               </div>

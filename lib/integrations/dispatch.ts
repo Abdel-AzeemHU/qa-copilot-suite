@@ -59,7 +59,7 @@ async function dispatchJira(
       let bugOutput: { title?: string; summary?: string } = {};
       try { bugOutput = JSON.parse(event.bugReport.output) as typeof bugOutput; } catch {}
       await createJiraBugReport(config, token, {
-        title: bugOutput.title ?? "Bug from QA Copilot Suite",
+        title: bugOutput.title ?? "Bug from Qaera",
         summary: bugOutput.summary ?? "",
       });
     } else if (event.type === "testcases.generated") {
@@ -132,7 +132,7 @@ export async function dispatchTestEvent(
 ): Promise<DispatchResult> {
   const event: IntegrationEvent = {
     type: "test",
-    message: "🔔 This is a test notification from QA Copilot Suite — your integration is working!",
+    message: "🔔 This is a test notification from Qaera — your integration is working!",
   };
 
   let result: DispatchResult;

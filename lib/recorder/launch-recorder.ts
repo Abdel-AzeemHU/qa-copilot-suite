@@ -56,7 +56,7 @@ function unavailable(extra?: string): RecorderUnavailable {
   const base =
     "The test recorder needs to open a real browser window on the machine " +
     "running the app. That requires a graphical display, which is available " +
-    "when you run QA Copilot Suite locally (e.g. `npm run dev` on your own " +
+    "when you run Qaera locally (e.g. `npm run dev` on your own " +
     "computer). On a headless server, install/start a virtual display (xvfb) " +
     "or wait for the upcoming cloud streaming backend.";
   return {

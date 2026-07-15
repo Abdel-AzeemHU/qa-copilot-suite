@@ -166,7 +166,7 @@ export function RecorderStudio({
     <div className="space-y-6">
       <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
         Note: recording launches a real browser on the machine running this app.
-        It works out of the box when you run QA Copilot Suite locally
+        It works out of the box when you run Qaera locally
         (self-hosted). Cloud streaming is a planned future enhancement.
       </p>
 

@@ -166,14 +166,14 @@ export function CiSetup({
     }
   };
 
-  const yamlSnippet = `name: QA Copilot on PR
+  const yamlSnippet = `name: Qaera on PR
 on: pull_request
 jobs:
   qa:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/qa-copilot-run
+      - uses: ./.github/actions/qaera-run
         with:
           api-token: \${{ secrets.QACS_TOKEN }}
           api-base-url: ${appUrl}
@@ -306,7 +306,7 @@ jobs:
         <CardHeader>
           <CardTitle>Setup instructions</CardTitle>
           <CardDescription>
-            Wire QA Copilot Suite into your pipeline in a few minutes.
+            Wire Qaera into your pipeline in a few minutes.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5 text-sm">
@@ -327,9 +327,9 @@ jobs:
             <p className="mb-2 text-neutral-400">
               Drop this into <code>.github/workflows/qa.yml</code>. It uses the
               composite action shipped in this repo at{" "}
-              <code>.github/actions/qa-copilot-run</code>. Marketplace-style
+              <code>.github/actions/qaera-run</code>. Marketplace-style
               usage is also supported once published, e.g.{" "}
-              <code>uses: your-org/qa-copilot-action@v1</code>.
+              <code>uses: your-org/qaera-action@v1</code>.
             </p>
             <CopyBlock text={yamlSnippet} />
           </div>

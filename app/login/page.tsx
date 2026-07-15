@@ -17,7 +17,7 @@ export default async function LoginPage() {
     <main className="flex flex-1 items-center justify-center bg-neutral-50 p-6">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>QA Copilot Suite</CardTitle>
+          <CardTitle>Qaera</CardTitle>
           <CardDescription>Sign in to your account</CardDescription>
         </CardHeader>
         <CardContent>

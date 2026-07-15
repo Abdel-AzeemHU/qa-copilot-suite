@@ -8,11 +8,11 @@ import { ProblemTabs } from "@/components/marketing/problem-tabs";
 import { SocialProof } from "@/components/marketing/social-proof";
 
 export const metadata: Metadata = {
-  title: "QA Copilot Suite — Closed-loop QA automation",
+  title: "Qaera — Closed-loop QA automation",
   description:
     "Generate test cases, get automation code you own, run it live, heal what breaks, and classify why tests fail — with your own LLM key and a CI gate that ignores known-flaky tests.",
   openGraph: {
-    title: "QA Copilot Suite — Closed-loop QA automation",
+    title: "Qaera — Closed-loop QA automation",
     description:
       "Generate test cases, get automation code you own, run it live, heal what breaks, and classify why tests fail — with your own LLM key and a CI gate that ignores known-flaky tests.",
     type: "website",
@@ -169,7 +169,7 @@ export default function Home() {
               The QA bottleneck, solved
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-slate-300">
-              Select a challenge to see how QA Copilot closes the gap.
+              Select a challenge to see how Qaera closes the gap.
             </p>
           </div>
           <ProblemTabs />

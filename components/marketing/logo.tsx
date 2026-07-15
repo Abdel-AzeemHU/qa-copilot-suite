@@ -18,7 +18,7 @@ export function Logo({ className = "" }: { className?: string }) {
         </svg>
       </span>
       <span className="text-[15px] font-semibold tracking-tight text-white">
-        QA Copilot
+        Qaera
       </span>
     </Link>
   );

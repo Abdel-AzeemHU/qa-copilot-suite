@@ -81,7 +81,7 @@ export default async function CiPage({
     };
   });
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.qacopilot.dev";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.qaera.ai";
 
   return (
     <>
