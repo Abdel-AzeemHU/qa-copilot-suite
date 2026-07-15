@@ -162,6 +162,12 @@ export default async function ProjectPage({
           >
             API Testing
           </Link>
+          <Link
+            href={`/projects/${project.id}/quality`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            📊 Quality
+          </Link>
         </div>
 
         <Card>
