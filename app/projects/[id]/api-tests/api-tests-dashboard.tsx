@@ -13,6 +13,7 @@ import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ApiTestRunnerPanel } from "./api-test-runner";
+import { ContractPanel } from "./contract-panel";
 
 // --- Types ---
 
@@ -455,6 +456,8 @@ export function ApiTestsDashboard({ projectId }: { projectId: string }) {
                       </label>
                     ))}
                   </div>
+
+                  <ContractPanel projectId={projectId} specId={activeSpec.id} />
                 </CardContent>
               </Card>
             )}

@@ -103,6 +103,7 @@ model Project {
   flakinessReports FlakinessReport[]
   apiSpecs         ApiSpec[]
   apiTestRuns      ApiTestRun[]
+  contractRuns     ContractRun[]
 
   @@index([orgId])
 }
@@ -353,10 +354,52 @@ model ApiSpec {
   baseUrl    String?
   createdAt  DateTime @default(now())
 
-  project   Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  endpoints ApiEndpoint[]
+  project      Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  endpoints    ApiEndpoint[]
+  contractRuns ContractRun[]
 
   @@index([projectId])
+}
+
+model ContractRun {
+  id             String    @id @default(cuid())
+  projectId      String
+  apiSpecId      String
+  status         String    @default("queued") // queued | running | passed | failed | error
+  totalEndpoints Int       @default(0)
+  passedCount    Int       @default(0)
+  failedCount    Int       @default(0)
+  skippedCount   Int       @default(0)
+  errorMessage   String?
+  includeUnsafe  Boolean   @default(false) // probe non-GET methods too
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+
+  project Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  apiSpec ApiSpec          @relation(fields: [apiSpecId], references: [id], onDelete: Cascade)
+  results ContractResult[]
+
+  @@index([projectId])
+  @@index([apiSpecId])
+}
+
+model ContractResult {
+  id            String  @id @default(cuid())
+  contractRunId String
+  endpointId    String?
+  method        String
+  path          String
+  status        String // passed | failed | skipped | error
+  responseCode  Int?
+  durationMs    Int?
+  issues        String  @default("[]") // JSON string[] of contract violations
+  detail        String? // e.g. skip reason or error message
+
+  contractRun ContractRun  @relation(fields: [contractRunId], references: [id], onDelete: Cascade)
+  endpoint    ApiEndpoint? @relation(fields: [endpointId], references: [id], onDelete: SetNull)
+
+  @@index([contractRunId])
 }
 
 model ApiEndpoint {
@@ -372,8 +415,9 @@ model ApiEndpoint {
   responses   String  @default("{}") // JSON-encoded
   tags        String  @default("[]") // JSON-encoded string[]
 
-  apiSpec   ApiSpec    @relation(fields: [apiSpecId], references: [id], onDelete: Cascade)
-  testCases TestCase[]
+  apiSpec         ApiSpec          @relation(fields: [apiSpecId], references: [id], onDelete: Cascade)
+  testCases       TestCase[]
+  contractResults ContractResult[]
 
   @@index([apiSpecId])
 }

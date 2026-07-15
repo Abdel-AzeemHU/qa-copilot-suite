@@ -52,6 +52,25 @@ A run **passes** only when every assertion passes.
   test cases. Real credential injection is a future enhancement.
 - Test cases run **sequentially** to be gentle on the target API.
 
+## Contract checks (spec-vs-code drift)
+
+From a spec's detail view, **Run contract check** probes the live API and
+verifies each endpoint's response against the documented contract:
+
+- **Undocumented status codes** — the API returned a status the spec doesn't
+  document (top-3 cause of production incidents in distributed systems).
+- **Content-type drift** — spec documents JSON, API returned something else.
+- **Schema violations** — missing required properties, wrong types, values
+  outside documented enums (validated structurally: `type`, `properties`,
+  `required`, `items`, `nullable`, `enum`; `$ref`/`allOf`/`oneOf`/`anyOf`
+  subtrees are skipped, never guessed).
+
+Safety: only **GET/HEAD** endpoints are probed by default. Non-GET methods are
+skipped (they can mutate real data) unless "include non-GET" is explicitly
+enabled. Path parameters are filled from spec examples where available, else
+`1`. Results are stored per endpoint on a `ContractRun`/`ContractResult` pair,
+with the last 10 runs kept visible.
+
 ## Generating code instead of running
 
 The generated `api` test cases are ordinary `TestCase` rows, so the **Automation
